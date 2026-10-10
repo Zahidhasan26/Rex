@@ -282,7 +282,8 @@ Give these to your AI as hard rules.
 
 **Git**
 
-14. Everyone works on the `main` branch. Before starting work and again before pushing: pull.
+14. Each person works on their own branch named `name/topic` (for example `zach/dinosaurs`, `halar/dino-anim`). Nobody pushes to `main` directly; Zahid merges finished branches into `main`. Before starting a new piece of work, merge the latest `main` into your branch so you have everyone else's changes.
+14a. Before every commit, discard files Unity changed by itself outside your folders. The usual ones are terrain materials under `Assets/TerrainDemoScene_URP`, `Assets/Scenes/BasicScene/Grid.mat`, `ProjectSettings/VersionControlSettings.asset` and `Assets/XR/Settings/OpenXRPackageSettings.asset`. Committing them can strip textures from the terrain plants or switch the project's version-control mode.
 15. Commit small and often, one feature per commit. Message format: `[player] bow fires arrow`, `[dino] maip walk and attack`, `[world] spawner ring`, `[hw] emg calibration`.
 16. Before committing, list the changed files. If any file is outside the owner's folders, do not commit it; undo that change.
 17. Always commit `.meta` files together with their assets.
@@ -331,7 +332,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 
 ## 11. Things to watch
 
-- **Dinosaur animations.** Neither model is confirmed to include animations. Halar and Zach check this first. Fallback: free animated low-poly dinosaurs (for example Quaternius).
+- **Dinosaur animations.** The Maip model only has an idle and the Gorgosaurus only has a run. We are keeping both and adding attack, hit, death and the Maip's walk in code, by rotating bones from a `ProceduralDinoAnim` script (Halar). Until that lands, dinosaurs tip over when killed.
 - **Model origin and credit.** The Gorgosaurus is listed as CC BY 4.0, which requires credit, and its page says it comes from a commercial *Walking with Dinosaurs* game. Put both models' authors and links in `CREDITS.md`, and check the event rules on third-party assets.
 - **Windows firewall.** The first time the game listens on the network, Windows asks for permission: allow Unity on private networks, and set the hotspot as a Private network. Otherwise EMG data silently never arrives.
 - **EMG arm and controller.** The right arm wears the sensor, so keep the right hand's buttons unused. Gripping a controller tenses the forearm and can fire arrows by accident.
