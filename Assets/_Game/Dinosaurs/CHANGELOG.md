@@ -6,6 +6,11 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (DinoTest uses the spawner)
+
+### Changed
+- `DinoTest`: removed the two hand-placed dinosaurs (Maip and Gorgosaurus). Added a `DinoSpawner` prefab instance at the origin with **Mode = Always**, so dinosaurs start spawning around the `DummyPlayer` as soon as you press Play (first one after ~1.5 s, up to 6 alive).
+
 ## 2026-10-10 (cleanup, test positions)
 
 ### Fixed
