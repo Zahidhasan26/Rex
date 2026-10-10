@@ -51,6 +51,12 @@ namespace BowGame
 
         public bool IsDead => isDead;
 
+        // Read-only hooks for visuals (ProceduralDinoAnim). They do not change behaviour.
+        public bool IsAttacking => isAttacking;
+        public event System.Action AttackStarted;        // an attack has just begun
+        public event System.Action<HitZone> WasHit;      // a hit that did not kill
+        public event System.Action Died;                 // the dinosaur has just died
+
         protected virtual void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -92,6 +98,7 @@ namespace BowGame
                 if (Time.time >= nextAttackTime)
                 {
                     nextAttackTime = Time.time + attackCooldown;
+                    AttackStarted?.Invoke();
                     StartCoroutine(AttackRoutine(player));
                 }
             }
@@ -134,6 +141,7 @@ namespace BowGame
                     break;
             }
             SetAnimTrigger(hitTrigger);
+            WasHit?.Invoke(zone);
         }
 
         protected virtual void Die()
@@ -147,8 +155,9 @@ namespace BowGame
             agent.enabled = false;
             foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
 
+            Died?.Invoke();
             if (HasParam(dieTrigger)) SetAnimTrigger(dieTrigger);
-            else StartCoroutine(FallOver());       // stand-in without a death animation
+            else if (Died == null) StartCoroutine(FallOver());   // stand-in when nothing else animates the death
 
             GameEvents.RaiseDinoDied(gameObject);
             Destroy(gameObject, corpseTime);

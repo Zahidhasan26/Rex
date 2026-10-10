@@ -78,6 +78,7 @@ GameObject:
   - component: {fileID: 9111987074733147544}
   - component: {fileID: 1773385514505351752}
   - component: {fileID: 1548569209778577167}
+  - component: {fileID: 5312591629203523013}
   m_Layer: 7
   m_Name: Gorgosaurus
   m_TagString: Untagged
@@ -135,16 +136,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62205bb84b87f1e43aa656a10f7829c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.Gorgosaurus
-  bodyHitsToKill: 5
+  bodyHitsToKill: 3
   legSlowMultiplier: 0.4
   legSlowDuration: 4
-  moveSpeed: 3
+  moveSpeed: 4.5
   turnSpeed: 360
   repathInterval: 0.25
   attackRange: 14
   attackCooldown: 3
   damage: 15
-  corpseTime: 4
+  corpseTime: 3
   animator: {fileID: 2755650236232453873}
   speedParam: Speed
   attackTrigger: Attack
@@ -159,6 +160,43 @@ MonoBehaviour:
   sightBlockers:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &5312591629203523013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893290893988514483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6009105d6a6349f294bb3854470cc29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.ProceduralDinoAnim
+  head: {fileID: 4855658379640325991}
+  neck: {fileID: 409828705612095925}
+  jaw: {fileID: 7229294290584008599}
+  spine: {fileID: 6056277642453236253}
+  tail:
+  - {fileID: 2579540261370560971}
+  - {fileID: 2014570866557030839}
+  - {fileID: 4293502172592141784}
+  - {fileID: 5275720789430035966}
+  - {fileID: 8848579278559027373}
+  - {fileID: 1941545721091951497}
+  - {fileID: 7284108684874275144}
+  upperLegL: {fileID: 2589832824255999446}
+  upperLegR: {fileID: 1420873224962554218}
+  lowerLegL: {fileID: 61345923281865838}
+  lowerLegR: {fileID: 8138815349547854151}
+  deathRollAngle: 85
+  deathFallDuration: 0.7
+  deathNeckDroop: 25
+  deathHeadDroop: 20
+  deathJawOpen: 18
+  deathTailDroop: 6
+  deathKneeFold: 35
+  deathSinkDepth: 1.5
+  deathSinkDuration: 1
 --- !u!1 &4399341197032259678
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,9 +722,34 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2755650236232453873}
   m_SourcePrefab: {fileID: 100100000, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+--- !u!4 &61345923281865838 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3591833284210868100, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &409828705612095925 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -5426501560375569825, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1420873224962554218 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -6721969656578192768, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1941545721091951497 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3166295616253851747, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2014570866557030839 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3095100055955825245, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2579540261370560971 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -7868511276673142239, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
   m_PrefabInstance: {fileID: 3531157036797686762}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2589832824255999446 stripped
@@ -702,6 +765,11 @@ Transform:
 --- !u!4 &3930386698312029185 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4293502172592141784 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 762416652377294386, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
   m_PrefabInstance: {fileID: 3531157036797686762}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &4449654616346283707 stripped
@@ -734,5 +802,35 @@ Animator:
 --- !u!4 &4855658379640325991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &5275720789430035966 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -561242933225023980, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6056277642453236253 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -1941886036973794825, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7229294290584008599 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3075206172727933827, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7284108684874275144 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6059429317634861730, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8138815349547854151 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4470999185684325715, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8848579278559027373 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -3761271613038341305, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
   m_PrefabInstance: {fileID: 3531157036797686762}
   m_PrefabAsset: {fileID: 0}
