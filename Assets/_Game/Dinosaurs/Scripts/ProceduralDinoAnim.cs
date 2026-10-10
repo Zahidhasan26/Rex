@@ -41,8 +41,26 @@ namespace BowGame
         [Tooltip("Seconds of sinking at the end (the Dinosaur's corpseTime decides when it disappears).")]
         [Range(0.1f, 3f)] public float deathSinkDuration = 1f;
 
+        [Header("Attack (scary open mouth)")]
+        [Range(0f, 80f)] public float attackJawOpen = 40f;
+        [Tooltip("Negative lifts the head back before it snaps.")]
+        [Range(-60f, 60f)] public float attackHeadPitch = -15f;
+        [Range(-60f, 60f)] public float attackNeckPitch = -10f;
+        [Tooltip("Small side-to-side head shake while the mouth is open.")]
+        [Range(0f, 20f)] public float attackShakeAngle = 4f;
+        [Range(0f, 40f)] public float attackShakeSpeed = 22f;
+        [Tooltip("Seconds to open the mouth.")]
+        [Range(0.02f, 1f)] public float attackOpenTime = 0.15f;
+        [Tooltip("Seconds to close the mouth after the attack.")]
+        [Range(0.02f, 1.5f)] public float attackCloseTime = 0.35f;
+        [Tooltip("Keep the mouth open at least this long, even for a very short attack.")]
+        [Range(0f, 2f)] public float attackMinHold = 0.4f;
+
         Dinosaur dino;
         Animator animator;
+
+        float attackWeight;        // 0 = mouth shut, 1 = fully open
+        float attackHoldUntil;
 
         bool dead;
         float deathTime;
@@ -63,12 +81,19 @@ namespace BowGame
         {
             if (dino == null) return;
             dino.Died += OnDied;
+            dino.AttackStarted += OnAttackStarted;
         }
 
         void OnDisable()
         {
             if (dino == null) return;
             dino.Died -= OnDied;
+            dino.AttackStarted -= OnAttackStarted;
+        }
+
+        void OnAttackStarted()
+        {
+            attackHoldUntil = Time.time + attackMinHold;
         }
 
         void OnDied()
@@ -88,7 +113,24 @@ namespace BowGame
         {
             BeginFrame();
 
-            if (dead) ApplyDeath();
+            if (dead) { ApplyDeath(); return; }
+
+            ApplyAttack();
+        }
+
+        void ApplyAttack()
+        {
+            bool open = (dino != null && dino.IsAttacking) || Time.time < attackHoldUntil;
+            float rate = open ? 1f / attackOpenTime : -1f / attackCloseTime;
+            attackWeight = Mathf.Clamp01(attackWeight + rate * Time.deltaTime);
+            if (attackWeight <= 0f) return;
+
+            float w = Ease(attackWeight);
+            float shake = Mathf.Sin(Time.time * attackShakeSpeed) * attackShakeAngle * w;
+            Pitch(neck, attackNeckPitch * w);
+            Pitch(head, attackHeadPitch * w);
+            Yaw(head, shake);
+            Pitch(jaw, attackJawOpen * w);
         }
 
         void ApplyDeath()
