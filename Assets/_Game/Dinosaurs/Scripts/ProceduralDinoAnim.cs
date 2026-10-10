@@ -70,8 +70,33 @@ namespace BowGame
         [Tooltip("Side whip added to every tail bone.")]
         [Range(0f, 20f)] public float hitTailWhip = 5f;
 
+        [Header("Walk (for a model with no walk animation, e.g. the Maip)")]
+        public bool proceduralWalk = false;
+        [Tooltip("Metres covered by one full step cycle (left + right). Bigger = slower, longer strides.")]
+        [Range(0.5f, 10f)] public float strideLength = 3.2f;
+        [Tooltip("Forward/back swing of the upper legs.")]
+        [Range(0f, 60f)] public float legSwing = 28f;
+        [Tooltip("Knee bend while the leg swings forward (foot lifts).")]
+        [Range(-90f, 90f)] public float kneeLift = 35f;
+        [Tooltip("Body rocks a little with each step.")]
+        [Range(0f, 15f)] public float bodyBob = 3f;
+        [Range(0f, 20f)] public float tailSway = 6f;
+        [Range(0f, 20f)] public float headSway = 3f;
+        [Tooltip("Speed (m/s) at which the walk is at full strength. Slower movement blends it in.")]
+        [Range(0.1f, 10f)] public float fullWalkSpeed = 2.5f;
+
+        [Header("Match the Animator's speed to movement (for a model that has a run clip, e.g. the Gorgosaurus)")]
+        public bool matchAnimSpeedToMovement = false;
+        [Tooltip("Movement speed (m/s) at which the clip looks right when played at normal speed.")]
+        [Range(0.5f, 10f)] public float animReferenceSpeed = 3f;
+        [Range(0f, 2f)] public float animMinSpeed = 0.6f;
+        [Range(0.5f, 4f)] public float animMaxSpeed = 2f;
+
         Dinosaur dino;
         Animator animator;
+        UnityEngine.AI.NavMeshAgent agent;
+        float walkPhase;
+        float walkWeight;
 
         float hitTime = -999f;
         float hitSide = 1f;
@@ -92,6 +117,7 @@ namespace BowGame
         {
             dino = GetComponent<Dinosaur>();
             animator = GetComponentInChildren<Animator>();
+            agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         }
 
         void OnEnable()
@@ -140,8 +166,47 @@ namespace BowGame
 
             if (dead) { ApplyDeath(); return; }
 
+            ApplyWalk();
             ApplyAttack();
             ApplyHit();
+        }
+
+        float MoveSpeed()
+        {
+            if (agent == null || !agent.enabled) return 0f;
+            Vector3 v = agent.velocity; v.y = 0f;
+            return v.magnitude;
+        }
+
+        void ApplyWalk()
+        {
+            float speed = MoveSpeed();
+
+            if (matchAnimSpeedToMovement && animator != null)
+                animator.speed = Mathf.Clamp(speed / animReferenceSpeed, animMinSpeed, animMaxSpeed);
+
+            if (!proceduralWalk) return;
+
+            float target = Mathf.Clamp01(speed / fullWalkSpeed);
+            walkWeight = Mathf.MoveTowards(walkWeight, target, Time.deltaTime * 4f);
+            if (walkWeight <= 0.001f) return;
+
+            walkPhase += Time.deltaTime * speed / strideLength * Mathf.PI * 2f;
+            if (walkPhase > Mathf.PI * 2f) walkPhase -= Mathf.PI * 2f;
+
+            float w = walkWeight;
+            float sL = Mathf.Sin(walkPhase);
+            float sR = Mathf.Sin(walkPhase + Mathf.PI);
+            // Upper legs swing opposite each other; the knee bends while that leg swings forward.
+            Pitch(upperLegL, legSwing * sL * w);
+            Pitch(upperLegR, legSwing * sR * w);
+            Pitch(lowerLegL, kneeLift * Mathf.Max(0f, Mathf.Cos(walkPhase)) * w);
+            Pitch(lowerLegR, kneeLift * Mathf.Max(0f, Mathf.Cos(walkPhase + Mathf.PI)) * w);
+
+            // Body rocks side to side once per step, tail sways the other way, head stays steadier.
+            Roll(spine, bodyBob * sL * w);
+            for (int i = 0; i < tail.Count; i++) Yaw(tail[i], tailSway * sL * w * (i + 1) / tail.Count);
+            Yaw(head, -headSway * sL * w);
         }
 
         void ApplyHit()

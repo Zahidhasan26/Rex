@@ -393,6 +393,34 @@ MonoBehaviour:
   deathKneeFold: 35
   deathSinkDepth: 1.5
   deathSinkDuration: 1
+  attackJawOpen: 40
+  attackHeadPitch: -15
+  attackNeckPitch: -10
+  attackShakeAngle: 4
+  attackShakeSpeed: 22
+  attackOpenTime: 0.15
+  attackCloseTime: 0.35
+  attackMinHold: 0.4
+  hitDuration: 0.4
+  hitSnapTime: 0.06
+  hitSpinePitch: -8
+  hitNeckPitch: -12
+  hitHeadPitch: -15
+  hitHeadSideways: 12
+  hitJawOpen: 15
+  hitTailWhip: 5
+  proceduralWalk: 1
+  strideLength: 3.2
+  legSwing: 28
+  kneeLift: 35
+  bodyBob: 3
+  tailSway: 6
+  headSway: 3
+  fullWalkSpeed: 2.5
+  matchAnimSpeedToMovement: 0
+  animReferenceSpeed: 3
+  animMinSpeed: 0.6
+  animMaxSpeed: 2
 --- !u!1 &6058316138331493632
 GameObject:
   m_ObjectHideFlags: 0
