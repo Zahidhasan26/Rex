@@ -6,6 +6,11 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-10 (audio folder)
+
+- `Dinosaurs/Audio/`: a staging folder for all sound effects, with the subfolders `Bow`, `Dinosaurs/Maip`, `Dinosaurs/Gorgosaurus`, `Player`, `UI`, `Ambience` and `Music`.
+- `Dinosaurs/Audio/SOUNDS.md`: a checklist of every sound needed, with file names, the format (`.wav`, mono for world sounds) and what matters most for the demo.
+
 ## 2026-10-10 (DinoTest setup)
 
 ### Scene `Assets/Scenes/DinoTest` (lock held by Zach)
