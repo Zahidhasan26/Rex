@@ -6,6 +6,11 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (prefabs)
+
+### Changed
+- `Gorgosaurus.fbx` and `Maip_LOD.fbx` import settings: the animation clip is renamed from "Scene" to `Gorgosaurus_Loop` / `Maip_Loop` and set to **Loop Time**.
+
 ## 2026-10-10
 
 ### Changed
