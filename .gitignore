@@ -34,3 +34,7 @@ sysinfo.txt
 # OS files
 .DS_Store
 Thumbs.db
+
+# Unity crash-recovery scene backups
+/Assets/_Recovery/
+/Assets/_Recovery.meta
