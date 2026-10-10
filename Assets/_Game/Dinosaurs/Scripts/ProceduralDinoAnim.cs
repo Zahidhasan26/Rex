@@ -56,8 +56,25 @@ namespace BowGame
         [Tooltip("Keep the mouth open at least this long, even for a very short attack.")]
         [Range(0f, 2f)] public float attackMinHold = 0.4f;
 
+        [Header("Hit flinch")]
+        [Tooltip("Seconds for the whole flinch (snap back, then recover).")]
+        [Range(0.1f, 1.5f)] public float hitDuration = 0.4f;
+        [Tooltip("Seconds to reach the strongest point of the flinch.")]
+        [Range(0.01f, 0.5f)] public float hitSnapTime = 0.06f;
+        [Range(-45f, 45f)] public float hitSpinePitch = -8f;
+        [Range(-60f, 60f)] public float hitNeckPitch = -12f;
+        [Range(-60f, 60f)] public float hitHeadPitch = -15f;
+        [Tooltip("Head snaps to one side (random left or right each hit).")]
+        [Range(0f, 45f)] public float hitHeadSideways = 12f;
+        [Range(0f, 60f)] public float hitJawOpen = 15f;
+        [Tooltip("Side whip added to every tail bone.")]
+        [Range(0f, 20f)] public float hitTailWhip = 5f;
+
         Dinosaur dino;
         Animator animator;
+
+        float hitTime = -999f;
+        float hitSide = 1f;
 
         float attackWeight;        // 0 = mouth shut, 1 = fully open
         float attackHoldUntil;
@@ -82,6 +99,7 @@ namespace BowGame
             if (dino == null) return;
             dino.Died += OnDied;
             dino.AttackStarted += OnAttackStarted;
+            dino.WasHit += OnWasHit;
         }
 
         void OnDisable()
@@ -89,6 +107,13 @@ namespace BowGame
             if (dino == null) return;
             dino.Died -= OnDied;
             dino.AttackStarted -= OnAttackStarted;
+            dino.WasHit -= OnWasHit;
+        }
+
+        void OnWasHit(HitZone zone)
+        {
+            hitTime = Time.time;
+            hitSide = Random.value < 0.5f ? -1f : 1f;
         }
 
         void OnAttackStarted()
@@ -116,6 +141,25 @@ namespace BowGame
             if (dead) { ApplyDeath(); return; }
 
             ApplyAttack();
+            ApplyHit();
+        }
+
+        void ApplyHit()
+        {
+            float t = Time.time - hitTime;
+            if (t < 0f || t > hitDuration) return;
+
+            // Snap back fast, then ease out over the rest of the duration.
+            float w = t < hitSnapTime
+                ? Ease(t / hitSnapTime)
+                : 1f - Ease((t - hitSnapTime) / Mathf.Max(0.01f, hitDuration - hitSnapTime));
+
+            Pitch(spine, hitSpinePitch * w);
+            Pitch(neck, hitNeckPitch * w);
+            Pitch(head, hitHeadPitch * w);
+            Yaw(head, hitHeadSideways * hitSide * w);
+            Pitch(jaw, hitJawOpen * w);
+            for (int i = 0; i < tail.Count; i++) Yaw(tail[i], -hitTailWhip * hitSide * w);
         }
 
         void ApplyAttack()
