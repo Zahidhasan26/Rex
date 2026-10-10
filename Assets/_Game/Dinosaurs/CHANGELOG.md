@@ -6,6 +6,20 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (cleanup, test positions)
+
+### Fixed
+- The commit "Zach dinotest Branch" accidentally included files outside our folders. They are reverted to their previous versions:
+  - `ProjectSettings/VersionControlSettings.asset`
+  - the terrain pack's grass, bush and water materials
+  - `AndroidXRSettingsInitializer`
+  - `BasicScene/Grid.mat`
+  - `Assets/Editor.meta` (removed)
+- Removed the full 151k-triangle `Maip.fbx` and its two 2K source textures (one has the NHK logo) from the repo and from the project; the local copies went to the Recycle Bin. `Maip_LOD.fbx` is the model we use.
+
+### Changed
+- `DinoTest`: the test dinosaurs are further out. The Maip moved from (-6, 0, 20) to (-15, 0, 40), and the Gorgosaurus from (-4.9, 0, 5) to (18, 0, 42), so you can watch their whole approach.
+
 ## 2026-10-10 (melee only, natural movement)
 
 ### Removed
