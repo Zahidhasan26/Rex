@@ -75,7 +75,11 @@ namespace BowGame
 
             var marker = hit.collider.GetComponent<HitZoneMarker>();
             var target = hit.collider.GetComponentInParent<IDamageable>();
-            if (target != null) target.TakeHit(marker != null ? marker.zone : HitZone.Body, strength, hit.point);
+            var zone = marker != null ? marker.zone : HitZone.Body;
+            var targetComponent = target as Component;
+            if (HitFeedback.Instance != null)
+                HitFeedback.Instance.Play(hit.point, hit.normal, target != null, zone, targetComponent != null ? targetComponent.gameObject : null);
+            if (target != null) target.TakeHit(zone, strength, hit.point);
 
             CancelInvoke();
             Destroy(gameObject, stuckTime);

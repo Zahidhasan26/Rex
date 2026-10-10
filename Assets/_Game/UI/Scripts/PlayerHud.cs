@@ -58,7 +58,7 @@ namespace BowGame
             }
         }
 
-        void OnDied() { Show("You died", 60f); }
+        void OnDied() { Show("You died", 3f); }
 
         void Show(string text, float seconds)
         {

@@ -34,6 +34,9 @@ namespace BowGame
             if (GameRefs.PlayerHead == head) GameRefs.PlayerHead = null;
         }
 
+        // Refill health (used by test scenes and when a round restarts).
+        public void ResetHealth() { Health = maxHealth; IsDead = false; }
+
         void OnState(GameState s)
         {
             if (s == GameState.Calibrate || s == GameState.Countdown) { Health = maxHealth; IsDead = false; }

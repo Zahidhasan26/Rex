@@ -1815,6 +1815,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: e4f332aea9a46b34bab01d9d6d17f588, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7402167447306084488}
+    - targetCorrespondingSourceObject: {fileID: 8298045291338814966, guid: e4f332aea9a46b34bab01d9d6d17f588, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8439234432476256166}
   m_SourcePrefab: {fileID: 100100000, guid: e4f332aea9a46b34bab01d9d6d17f588, type: 3}
 --- !u!1 &7684760677757835693 stripped
 GameObject:
@@ -1866,6 +1869,26 @@ MonoBehaviour:
   head: {fileID: 9039471625765454066}
   maxHealth: 100
   fullBuzzDamage: 30
+--- !u!114 &8439234432476256166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7684760677757835693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cc8b8c6323037149ae719ab2a27fc11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.HitFeedback
+  hitBurst: {fileID: 5966442110250585244, guid: 182f342d55f8c9e47ba9c0489bcc2d88, type: 3}
+  headshotBurst: {fileID: 8533286973658870499, guid: 4de7bc80a72919f408797170bb195790, type: 3}
+  dustBurst: {fileID: 4504376199466068464, guid: d589630b6cff63148890882326490134, type: 3}
+  headColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  bodyColor: {r: 1, g: 0.25, b: 0.2, a: 1}
+  legColor: {r: 0.4, g: 0.8, b: 1, a: 1}
+  showWords: 1
+  flashTime: 0.18
 --- !u!4 &7684760677757835694 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8298045291338814965, guid: e4f332aea9a46b34bab01d9d6d17f588, type: 3}
