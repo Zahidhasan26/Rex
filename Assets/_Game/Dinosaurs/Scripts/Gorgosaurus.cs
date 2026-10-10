@@ -37,11 +37,14 @@ namespace BowGame
             Vector3 from = MouthPosition;
             Vector3 to = player.position;
             int mask = sightBlockers;
-            int dino = LayerMask.NameToLayer("Dinosaur");
-            if (dino >= 0) mask &= ~(1 << dino);
-            // Blocked only if something other than the player is in the way.
+            foreach (var n in new[] { "Dinosaur", "Player", "EnemyProjectile", "Arrow" })
+            {
+                int l = LayerMask.NameToLayer(n);
+                if (l >= 0) mask &= ~(1 << l);
+            }
+            // Blocked only if something that isn't part of the player (terrain, trees, rocks) is in the way.
             if (Physics.Linecast(from, to, out RaycastHit hit, mask, QueryTriggerInteraction.Ignore))
-                return hit.transform == player || hit.transform.IsChildOf(player);
+                return hit.transform.root == player.root;
             return true;
         }
 

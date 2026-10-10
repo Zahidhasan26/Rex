@@ -6,6 +6,19 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-10 (DinoTest setup)
+
+### Scene `Assets/Scenes/DinoTest` (lock held by Zach)
+- `NavMesh` object with a `NavMeshSurface` (Ground layer, physics colliders) and a baked NavMesh (`Assets/Scenes/DinoTest/NavMesh-NavMesh.asset`).
+- `Maip` instance at (-6, 0, 20) and `Gorgosaurus` instance at (-4.9, 0, 5).
+- `DinoHitTester` on the Main Camera: in Play mode, left-click a dinosaur in the Game view to hit it.
+
+### Tested in Play mode
+- The Maip chases the `DummyPlayer`, stops in range and bites every ~1.6 s (10 damage each).
+- The Gorgosaurus holds its position and spits every ~3 s (15 damage each).
+- 3 body hits kill the Maip, a head hit kills the Gorgosaurus, and dead dinosaurs tip over and are removed after 4 s.
+- No errors in the Console.
+
 ## 2026-10-10 (prefabs)
 
 ### Prefabs (`Dinosaurs/Prefabs`)

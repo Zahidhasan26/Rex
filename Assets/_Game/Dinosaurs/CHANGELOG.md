@@ -6,6 +6,11 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (DinoTest setup)
+
+### Fixed
+- `Gorgosaurus.cs` line-of-sight check: the player's own body collider counted as "blocking", so the Gorgosaurus walked into the player instead of spitting. It now ignores anything that is part of the player, plus the `Dinosaur`, `Player`, `EnemyProjectile` and `Arrow` layers.
+
 ## 2026-10-10 (prefabs)
 
 ### Changed
