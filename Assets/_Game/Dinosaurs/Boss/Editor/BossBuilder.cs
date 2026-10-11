@@ -403,7 +403,8 @@ namespace BowGame
             boss.corpseTime = 10f; boss.syncAnimationToSpeed = false; boss.deathVariants = 3;
             boss.projectilePrefab = orb; boss.throwHand = hand; boss.heldOrb = held;
 
-            root.AddComponent<BossFace>();
+            var bossFace = root.AddComponent<BossFace>();
+            bossFace.landmarkModel = AssetDatabase.LoadAssetAtPath<Unity.InferenceEngine.ModelAsset>(Root + "/AI/face_landmark.onnx");
             var bar = root.AddComponent<BossHealthBar>();
             bar.boss = boss; bar.anchor = head;
 

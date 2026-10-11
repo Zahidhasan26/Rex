@@ -467,9 +467,18 @@ MonoBehaviour:
     width: 1
     height: 1
   mirror: 0
+  generate3DFace: 1
+  landmarkModel: {fileID: 5022602860645237092, guid: 88462018483f3f542a064bca8debea68, type: 3}
+  autoFitPhoto: 1
+  faceDepth: 1
+  faceLift: 0.0015
+  headEyeLine: 0.55
+  headChin: 0.035
+  faceWidthOnHead: 0.86
   hairStyle: 0
   maskHairStyle: 2
   hairTintBoost: 1.45
+  curlyBusyness: 0.05
   edgeFade: 0.1
   photoBrightness: 0.95
   earLine: 0.47

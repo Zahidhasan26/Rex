@@ -6,6 +6,22 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (face tracking and a generated 3D face)
+
+- **Face tracking** (`Boss/Scripts/FaceLandmarker.cs`): finds **468 points** on the face in the picture (eye corners, brows, nose, lips, jaw line, depth) with the MediaPipe Face Mesh network (`Boss/AI/face_landmark.onnx`, Apache 2.0, credits in `Boss/AI/CREDITS.txt`).
+  - It runs locally on the CPU through Unity's **Inference Engine** package (`com.unity.ai.inference` 2.6.1, newly added to the project). The picture never leaves the computer.
+  - It re-centres on the face over three passes, so the face doesn't need to be in the middle of the photo.
+- **Generated 3D face** (`BossFace`): from those points it builds a real **3D face mesh** shaped like the person (nose, brows, cheekbones, lips, chin) and puts it on the front of the boss's head, on the Head bone, so it moves with the head.
+  - Each point is placed on the head and pushed out by how far the person's face sticks out compared with the plain head. The depth eases in from the edge so the face blends into the head.
+  - It has its own texture, cut out of the photo, which fades to the skin colour at the edges.
+  - The mesh uses the face-mesh triangles in `Scripts/FaceMeshTopology.cs`. It is built at runtime and never saved.
+- **Automatic framing** (`autoFitPhoto`, on by default): the photo is lined up on the head from the face it finds, so there is no Photo Crop to adjust.
+  - Everything outside the face is replaced by the skin and hair colours (background, ears, shoulders). The forehead and hair above the face are kept.
+  - The hair colour is taken just above the hairline, found by walking up from the forehead until the colour stops being skin. If it never stops being skin, the head counts as bald.
+- New `BossFace` settings: `generate3DFace`, `landmarkModel`, `autoFitPhoto`, `faceDepth`, `faceLift`, `edgeSoftness`, `edgeFadeInside`, `faceWidthOnHead`, `headEyeLine`, `headChin`. A read-only `FaceStatus` says what it did (e.g. "3D face built from 468 points").
+- Works with the preset photo and with the live webcam scan, in edit mode (Scene view) and in Play mode. Building takes about 1-1.5 s, once per photo.
+- Tested on the drawn test heads and on the photo in `FacePhotos`: face found (score 1.00), 3D face built, and the hair style and colour picked. No errors.
+
 ## 2026-10-11 (3D hair presets for the boss)
 
 - **Four 3D hair meshes in `Boss.fbx`**, on the head bone: `Hair_Short`, `Hair_Medium`, `Hair_Long` (with a sheet falling to the shoulders, which follows the upper body), and `Hair_Curly` (big rounded volume with bumps). Plus "None" for bald.

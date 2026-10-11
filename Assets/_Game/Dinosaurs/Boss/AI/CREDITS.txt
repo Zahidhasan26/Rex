@@ -1,0 +1,11 @@
+Face tracking model
+------------------
+face_landmark.onnx is the MediaPipe Face Mesh landmark model (face_landmark.tflite from MediaPipe 0.10.14),
+converted to ONNX with tf2onnx. The face mesh triangles in Scripts/FaceMeshTopology.cs come from MediaPipe's
+canonical_face_model.obj.
+
+MediaPipe, Copyright Google LLC, Apache License 2.0: https://github.com/google-ai-edge/mediapipe
+http://www.apache.org/licenses/LICENSE-2.0
+
+The model runs locally on the CPU through Unity's Inference Engine (com.unity.ai.inference). Pictures are not
+sent anywhere.
