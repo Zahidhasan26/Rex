@@ -335,6 +335,7 @@ namespace BowGame.EditorTools
                     cx.AddKey(time, q.x); cy.AddKey(time, q.y); cz.AddKey(time, q.z); cw.AddKey(time, q.w);
                 }
                 if (!changes) { cx = Flat(rot[0, i].x, length); cy = Flat(rot[0, i].y, length); cz = Flat(rot[0, i].z, length); cw = Flat(rot[0, i].w, length); }
+                else { cx = Reduce(cx); cy = Reduce(cy); cz = Reduce(cz); cw = Reduce(cw); }
                 Set(clip, r.paths[i], "m_LocalRotation.x", cx); Set(clip, r.paths[i], "m_LocalRotation.y", cy);
                 Set(clip, r.paths[i], "m_LocalRotation.z", cz); Set(clip, r.paths[i], "m_LocalRotation.w", cw);
 
@@ -348,6 +349,7 @@ namespace BowGame.EditorTools
                         px.AddKey(time, pos[f, i].x); py.AddKey(time, pos[f, i].y); pz.AddKey(time, pos[f, i].z);
                     }
                 else { px = Flat(pos[0, i].x, length); py = Flat(pos[0, i].y, length); pz = Flat(pos[0, i].z, length); }
+                if (moves) { px = Reduce(px); py = Reduce(py); pz = Reduce(pz); }
                 Set(clip, r.paths[i], "m_LocalPosition.x", px); Set(clip, r.paths[i], "m_LocalPosition.y", py); Set(clip, r.paths[i], "m_LocalPosition.z", pz);
             }
             clip.EnsureQuaternionContinuity();
@@ -358,6 +360,36 @@ namespace BowGame.EditorTools
 
             if (isNew) AssetDatabase.CreateAsset(clip, path); else EditorUtility.SetDirty(clip);
             return clip;
+        }
+
+        // Drops keys that a smooth curve through their neighbours already reproduces (keeps files small).
+        static AnimationCurve Reduce(AnimationCurve c, float tolerance = 0.0005f)
+        {
+            for (int i = 0; i < c.length; i++) c.SmoothTangents(i, 0f);
+            var keys = new List<Keyframe>(c.keys);
+            bool removed = true;
+            while (removed && keys.Count > 2)
+            {
+                removed = false;
+                for (int i = 1; i < keys.Count - 1; i++)
+                {
+                    var trial = new List<Keyframe>(keys);
+                    trial.RemoveAt(i);
+                    var tc = new AnimationCurve(trial.ToArray());
+                    for (int k = 0; k < tc.length; k++) tc.SmoothTangents(k, 0f);
+                    if (Mathf.Abs(tc.Evaluate(keys[i].time) - keys[i].value) < tolerance
+                        && Mathf.Abs(tc.Evaluate((keys[i - 1].time + keys[i].time) * 0.5f) - c.Evaluate((keys[i - 1].time + keys[i].time) * 0.5f)) < tolerance
+                        && Mathf.Abs(tc.Evaluate((keys[i].time + keys[i + 1].time) * 0.5f) - c.Evaluate((keys[i].time + keys[i + 1].time) * 0.5f)) < tolerance)
+                    {
+                        keys.RemoveAt(i);
+                        removed = true;
+                        i++;   // skip the neighbour this round to avoid drifting
+                    }
+                }
+            }
+            var result = new AnimationCurve(keys.ToArray());
+            for (int k = 0; k < result.length; k++) result.SmoothTangents(k, 0f);
+            return result;
         }
 
         static AnimationCurve Flat(float v, float length) => new AnimationCurve(new Keyframe(0f, v), new Keyframe(length, v));
