@@ -110,7 +110,9 @@ MonoBehaviour:
   aimStep: 0.04
   audioSource: {fileID: 5115046910333794983}
   drawClip: {fileID: 0}
-  releaseClip: {fileID: 0}
+  releaseClip: {fileID: 8300000, guid: c5f26f041c8e0f74187a9f1c5d5c007c, type: 3}
+  flightClip: {fileID: 0}
+  flightVolume: 0.7
 --- !u!82 &5115046910333794983
 AudioSource:
   m_ObjectHideFlags: 0
