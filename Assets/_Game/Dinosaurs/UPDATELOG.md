@@ -6,6 +6,40 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-10 (sound)
+
+### Audio files (`Dinosaurs/Audio`): made from Zach's "Good" folder (originals untouched)
+- Cleaned up: silence trimmed, short fades, peak matched, mono 48 kHz `.wav` for 3D sounds. Arrow sounds are in `Bow/` (`arrow_whoosh`, `arrow_hit_flesh_01`, `arrow_hit_flesh_02`, `arrow_hit_head`); dinosaur sounds are in `Dinosaurs/Shared/` (`dino_growl`, `dino_footstep_01`, `dino_collapse`).
+- **Split:** `EFX SD Monster Voices 11 A` → `dino_roar_A_01` … `_05` (2.4, 5.1, 0.7, 0.6, 0.6 s). `Rage Monster 13 B` is a single roar, kept as `dino_roar_B_01` (3.4 s).
+- **Ambient:** the 107 MB, 96 kHz drone → `Ambience/amb_tension_drone_loop.ogg` (~3 MB, 172 s). Silent start and end trimmed, a 3 s crossfade makes it loop seamlessly, and it is raised to −6 dB peak. Imported as Streaming / Vorbis.
+- Short clips import as Decompress On Load / ADPCM / Force To Mono.
+
+### Scripts
+- **`Dinosaurs/Scripts/DinoAudio.cs`**: dinosaur sound player. It uses a "Voice" source on the head bone and a "Body" source on the root, both 3D. It plays:
+  - footsteps by distance walked (stride length)
+  - a spawn call (60% chance)
+  - a growl on pauses
+  - a charge roar
+  - an attack snarl
+  - hurt sounds on body and leg hits
+  - a death roar and the collapse thud
+  - arrow impacts at the hit point (a special sound for headshots)
+  - Each sound gets a random pitch variation around a base pitch.
+- **`World/Scripts/AmbientAudio.cs`**: looping 2D ambience with a fade-in.
+- `Dinosaur.cs` now raises local events (`Spawned`, `Paused`, `ChargeStarted`, `AttackStarted`, `Hit`, `Died`, `Collapsed`) for components on the same dinosaur. This adds no new team contract.
+
+### Prefabs
+- `Maip.prefab` and `Gorgosaurus.prefab`: `DinoAudio` added and wired.
+  - Spawn: roar A_01 or B_01. Charge: B_01 or A_01. Pause: growl. Attack: A_03. Hurt: A_04 or A_05. Death: A_02. Steps: footstep_01. Collapse: collapse. Impacts: flesh_01/02 and head.
+  - Maip: pitch 1.15, stride 1.6 m, quieter steps. Gorgosaurus: pitch 0.8, stride 3.2 m, louder steps.
+- **`World/Prefabs/AmbientAudio.prefab`**: drone loop at volume 0.35, 3 s fade-in. Added to `DinoTest`.
+
+### Tested (Play mode, DinoTest)
+- The ambience fades in and loops. The dinosaurs' voice and body sounds play while they spawn and move, and forced hits produce impact sounds. No errors.
+
+### Not wired (Zahid's bow code)
+- `Bow/arrow_whoosh.wav` and `Bow/shoot.ogg` are ready for the bow release and arrow flight.
+
 ## 2026-10-10 (dinosaur spawner)
 
 ### World (`Assets/_Game/World`)

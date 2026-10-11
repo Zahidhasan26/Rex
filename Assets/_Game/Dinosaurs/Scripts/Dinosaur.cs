@@ -121,6 +121,12 @@ namespace BowGame
         public event System.Action AttackStarted;        // an attack has just begun
         public event System.Action<HitZone> WasHit;      // a hit that did not kill
         public event System.Action Died;                 // the dinosaur has just died
+        // Sound hooks (DinoAudio). They do not change behaviour.
+        public event System.Action Paused;                         // stopped to sniff / look around
+        public event System.Action ChargeStarted;                  // entered charge distance
+        public event System.Action<HitZone, Vector3> Hit;          // any arrow hit, including the killing one, with the hit point
+
+        bool charging;
 
         protected virtual void Awake()
         {
@@ -196,10 +202,13 @@ namespace BowGame
             if (wander01 >= 1f && Random.value < pauseChancePerSecond * Time.deltaTime)
             {
                 pausedUntil = Time.time + Random.Range(pauseDuration.x, pauseDuration.y);
+                Paused?.Invoke();
                 return;
             }
 
             agent.isStopped = false;
+            if (!charging && dist <= chargeDistance) { charging = true; ChargeStarted?.Invoke(); }
+            else if (charging && dist > chargeDistance * 1.5f) charging = false;
             agent.speed = CurrentSpeed(dist);
             agent.autoBraking = wander01 <= 0f;   // brake on the final run-in so it stops at biting range
             agent.stoppingDistance = dist <= attackRange ? 1f : attackRange * 0.8f;
@@ -338,6 +347,7 @@ namespace BowGame
             if (isDead) return;
 
             pausedUntil = 0f;   // getting shot snaps it out of a pause
+            Hit?.Invoke(zone, hitPoint);
             switch (zone)
             {
                 case HitZone.Head:
