@@ -6,6 +6,17 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (spray-style acid spit)
+
+### New
+- `Textures/FX/`: `spit_droplet.png` (irregular wet droplet), `spit_mist.png` (cloudy noise), `spit_splat.png` (splash with streaks and specks). These are procedurally generated grayscale-plus-alpha textures, tinted by the particle colour.
+- `Materials/FX/`: `Spit_Droplet`, `Spit_Mist`, `Spit_Splat` (URP Particles/Unlit, transparent).
+- **`Prefabs/SpitSplash.prefab`**: impact effect.
+  - A burst of droplets thrown outward along the surface normal, with gravity.
+  - A small mist puff.
+  - An acid splat lying flat on the surface that fades out over ~3 s.
+  - It removes itself when finished.
+
 ## 2026-10-10 (sound)
 
 ### Audio files (`Dinosaurs/Audio`): made from Zach's "Good" folder (originals untouched)

@@ -6,6 +6,22 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (spray-style acid spit)
+
+### Changed
+- **`Spit.prefab` is now a spray instead of one glowing ball.** The sphere mesh, material and trail were removed and replaced by three particle systems that face the direction of travel:
+  - `Droplets`: a burst of ~28 droplets fanning out of the mouth, then more droplets streaming off as it flies. They fall with gravity and inherit the spit's speed.
+  - `Mist`: soft acid haze along the path.
+  - `Clump`: 9–12 wobbling droplets that make up the main body, so it reads as a textured clump rather than a perfect sphere.
+- `SpitProjectile.cs`:
+  - It now turns to face its velocity every frame, so the spray points the right way.
+  - New `impactPrefab` field: `SpitSplash` is spawned at the hit point, aligned to the ground or tree surface. When it hits the player, the splash is half size and has no ground splat.
+  - On impact, the droplet and mist trails detach and fade out naturally instead of vanishing.
+  - Damage, speed, arc and hit radius are unchanged.
+
+### Tested
+- Rendered frames in Play mode: the spray leaving the Gorgosaurus mouth, droplets and mist along the arc, the splat on the ground, and the small splash on a player hit. No errors.
+
 ## 2026-10-10 (stuck-on-spawn fix)
 
 ### Fixed
