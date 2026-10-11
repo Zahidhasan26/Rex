@@ -18,7 +18,7 @@ namespace BowGame
         public Transform throwHand;
         [Tooltip("Seconds into the throw animation when the orb is released.")]
         public float throwRelease = 0.62f;
-        public float throwDamage = 12f;
+        public float throwDamage = 10f;
         [Tooltip("Orb visible in the hand during the wind-up (optional).")]
         public GameObject heldOrb;
 
@@ -31,13 +31,19 @@ namespace BowGame
         [Tooltip("How fast it can steer while running (degrees per second). Low = easy to dodge.")]
         public float chargeTurnRate = 50f;
         public float maxChargeTime = 2.6f;
-        [Tooltip("Starts the smash when this close.")]
-        public float smashStartDistance = 2.2f;
+        [Tooltip("Starts the smash when the player is this far ahead (or already beside it).")]
+        public float smashStartDistance = 1.6f;
+        [Tooltip("Inside this distance the run stops steering and goes straight, so a late sidestep makes it miss.")]
+        public float commitDistance = 6f;
         [Tooltip("Seconds into the smash animation when it lands.")]
         public float smashHitTime = 0.4f;
         [Tooltip("The smash hurts if the player is within this distance when it lands.")]
-        public float smashReach = 2.6f;
+        public float smashReach = 2.4f;
         public float smashDamage = 25f;
+        [Tooltip("The smash only hits in front of the boss, within this many degrees either side. A late sidestep dodges it.")]
+        [Range(10f, 180f)] public float smashArc = 30f;
+        [Tooltip("How fast it can still turn during a standing smash's wind-up (degrees per second).")]
+        public float smashTurnSpeed = 45f;
         public float smashRecover = 0.8f;
         [Tooltip("Player this close: smash without charging.")]
         public float meleeRange = 2.4f;
@@ -155,11 +161,16 @@ namespace BowGame
             SetBool(chargingBool, true);
             Vector3 dir = Flat(player.position - transform.position).normalized;
             float t = 0f;
+            bool committed = false;
             while (!isDead && player != null && t < maxChargeTime)
             {
                 Vector3 to = Flat(player.position - transform.position);
-                if (to.magnitude <= smashStartDistance) break;
-                dir = Vector3.RotateTowards(dir, to.normalized, chargeTurnRate * Mathf.Deg2Rad * Time.deltaTime, 0f);
+                float ahead = Vector3.Dot(to, dir);
+                // Swing once the player is level with the reach in front, or already beside or behind (it ran past).
+                if (ahead <= smashStartDistance) break;
+                // In the last few metres it stops steering: this is the moment to sidestep.
+                if (!committed && to.magnitude <= commitDistance) committed = true;
+                if (!committed) dir = Vector3.RotateTowards(dir, to.normalized, chargeTurnRate * Mathf.Deg2Rad * Time.deltaTime, 0f);
                 agent.Move(dir * chargeRunSpeed * Time.deltaTime);
                 transform.rotation = Quaternion.LookRotation(dir);
                 t += Time.deltaTime;
@@ -175,9 +186,13 @@ namespace BowGame
             isAttacking = true;
             SmashStarted?.Invoke();
             SetAnimTrigger(smashTrigger);
+            // Commit to the swing: it barely turns during the wind-up (not at all after a charge), so a sidestep works.
+            float savedTurn = turnSpeed;
+            turnSpeed = fromCharge ? 0f : smashTurnSpeed;
             yield return new WaitForSeconds(smashHitTime);
+            turnSpeed = savedTurn;
 
-            if (!isDead && player != null && FlatDistance(transform.position, player.position) <= smashReach)
+            if (!isDead && player != null && InSmashArc(player))
                 GameEvents.RaisePlayerHit(smashDamage, transform.position);
 
             yield return new WaitForSeconds(smashRecover);
@@ -189,6 +204,13 @@ namespace BowGame
         {
             isAttacking = false;
             nextAttackTime = Mathf.Max(nextAttackTime, Time.time + attackCooldown * UnityEngine.Random.Range(0.6f, 0.9f));
+        }
+
+        bool InSmashArc(Transform player)
+        {
+            Vector3 to = Flat(player.position - transform.position);
+            if (to.magnitude > smashReach) return false;
+            return to.sqrMagnitude < 0.01f || Vector3.Angle(transform.forward, to) <= smashArc;
         }
 
         protected override void Die()

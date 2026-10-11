@@ -6,6 +6,20 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (boss fight test and tuning)
+
+### Tested
+- Full fight in BossTest with real arrows (the `Arrow` prefab fired at the boss's hitboxes) and a stand-in player. The boss threw, charged, smashed, enraged at half health, played a death animation, sent `BossEnemy.Defeated`, and its body was removed 10 s later. 22 of 23 arrows registered (body, head and leg zones all worked). No errors.
+
+### Changed (`BossEnemy.cs`)
+- **The charge can now be dodged.** In the first test, a sidestep never worked: the boss kept steering, and the smash hit anyone within 2.6 m in any direction.
+  - Inside `commitDistance` (6 m) the run stops steering and goes straight.
+  - The smash starts when the player is 1.6 m ahead, or already beside or behind it.
+  - The smash only hits in front: within 30° either side and 2.4 m reach.
+  - It no longer turns during the wind-up of a charge smash; a standing smash turns only 45°/s.
+  - Result: a 1.2 m sidestep when the boss is about 4 m away makes it miss. Standing still still takes the 25 damage.
+- Orb damage 12 → 10. A player who never moves now survives one full fight with a little health left (it was dying before the boss went down).
+
 ## 2026-10-11 (VR in DinoTest)
 
 ### Changed

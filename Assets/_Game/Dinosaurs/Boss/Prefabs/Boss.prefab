@@ -418,7 +418,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: 4362212782865308354, guid: 2baedf94c38ce1843a0d6c55b42303b3, type: 3}
   throwHand: {fileID: 7517977006225382249}
   throwRelease: 0.62
-  throwDamage: 12
+  throwDamage: 10
   heldOrb: {fileID: 1409774309894393400}
   chargeChance: 0.4
   minChargeDistance: 5
@@ -426,10 +426,13 @@ MonoBehaviour:
   chargeRunSpeed: 7.5
   chargeTurnRate: 50
   maxChargeTime: 2.6
-  smashStartDistance: 2.2
+  smashStartDistance: 1.6
+  commitDistance: 6
   smashHitTime: 0.4
-  smashReach: 2.6
+  smashReach: 2.4
   smashDamage: 25
+  smashArc: 30
+  smashTurnSpeed: 45
   smashRecover: 0.8
   meleeRange: 2.4
   rageAtHealth: 0.5
