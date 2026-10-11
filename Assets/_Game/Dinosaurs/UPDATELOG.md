@@ -6,6 +6,30 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-10 (dinosaur spawner)
+
+### World (`Assets/_Game/World`)
+- **`Scripts/DinoSpawner.cs`**: spawns dinosaurs on a ring around `GameRefs.PlayerHead`.
+  - Spawns 28–40 m away, never within 70° of where the player is looking (so they appear behind and to the sides), snapped onto the NavMesh, at least 6 m from other living dinosaurs. They spawn facing the player.
+  - The interval ramps from 6 s down to 1.5 s over `rampDuration` (30 s, matching fast mode), with ±25% randomness. The first spawn comes after 1.5 s.
+  - `maxAlive` = 6.
+  - Weighted random type, with an optional unlock time per type.
+  - `mode`:
+    - `OnlyDuringSurvive` (default) starts when `GameEvents.StateChanged` reports `Survive` and stops on any other state. On `ActOneComplete` it clears all dinosaurs (marked FINAL ACT HOOK).
+    - `Always` is for test scenes without GameFlow.
+  - Public methods for GameFlow: `Begin()`, `Stop()`, `SpawnOne()`, `ClearAll()`, and the `AliveCount` property.
+  - Draws the spawn ring as an orange gizmo when selected.
+- **`Prefabs/DinoSpawner.prefab`**: Maip (weight 3, from the start) and Gorgosaurus (weight 1, unlocks after 8 s).
+
+### Tested (Play mode, DinoTest, spawner added temporarily, mode Always)
+- 6 Maips spawned 28–40 m out, all behind or beside the player, and surrounded it. The cap of 6 held.
+- Forced 40 spawns: 12 Gorgosaurus and 28 Maip, 0 failed placements. No errors.
+
+## 2026-10-10 (audio folder)
+
+- `Dinosaurs/Audio/`: a staging folder for all sound effects, with the subfolders `Bow`, `Dinosaurs/Maip`, `Dinosaurs/Gorgosaurus`, `Player`, `UI`, `Ambience` and `Music`.
+- `Dinosaurs/Audio/SOUNDS.md`: a checklist of every sound needed, with file names, the format (`.wav`, mono for world sounds) and what matters most for the demo.
+
 ## 2026-10-10 (DinoTest setup)
 
 ### Scene `Assets/Scenes/DinoTest` (lock held by Zach)

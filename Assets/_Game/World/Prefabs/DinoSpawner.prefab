@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1722183807874292545
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2371701585889221208}
+  - component: {fileID: 7530793580799103582}
+  m_Layer: 0
+  m_Name: DinoSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2371701585889221208
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1722183807874292545}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7530793580799103582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1722183807874292545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36d2d020956f6dd41b215b261ab557c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoSpawner
+  dinosaurs:
+  - prefab: {fileID: 740058287092723877, guid: ad65298fa70c9ec4f8ed25ae915864d3, type: 3}
+    weight: 3
+    unlockAfter: 0
+  - prefab: {fileID: 1548569209778577167, guid: 36c24e7abf826954295699756a070f83, type: 3}
+    weight: 1
+    unlockAfter: 8
+  mode: 0
+  startInterval: 6
+  endInterval: 1.5
+  rampDuration: 30
+  intervalJitter: 0.25
+  firstSpawnDelay: 1.5
+  maxAlive: 6
+  spawnDistance: {x: 28, y: 40}
+  hiddenFromViewAngle: 70
+  minSeparation: 6
+  navMeshSnap: 5
+  placementAttempts: 12
+  clearOnActOneComplete: 1
