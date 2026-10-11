@@ -34,6 +34,8 @@ namespace BowGame
 
         [Header("Flow")]
         public bool showOnStart = true;
+        [Tooltip("If a scan is already in memory (e.g. after restarting a test scene), skip the booth and finish straight away.")]
+        public bool skipIfAlreadyScanned = true;
         [Tooltip("Optional quad/plane that also shows the live camera (e.g. a mirror in the lobby).")]
         public Renderer previewScreen;
         [Tooltip("Called after the scan is kept or skipped.")]
@@ -49,7 +51,9 @@ namespace BowGame
 
         void Start()
         {
-            if (showOnStart) Begin();
+            if (!showOnStart) return;
+            if (skipIfAlreadyScanned && FaceScanStore.HasFace) { CurrentStep = Step.Done; onFinished?.Invoke(); return; }
+            Begin();
         }
 
         public void Begin()

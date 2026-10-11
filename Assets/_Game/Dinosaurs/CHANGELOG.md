@@ -6,6 +6,14 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (DinoTest: face scan + boss, third person again)
+
+### Changed
+- **`Assets/Scenes/DinoTest.unity` is back to the third-person desktop view** (the overhead camera with click-to-hit, and `DummyPlayer`). The VR rig is still in the scene, switched off as "Player (VR - tick to use with headset)". To use the headset, tick it and untick "Desktop Test (third person)".
+- **The boss fight with the face scan is in DinoTest.** Press Play and the scan booth appears over the Game view (Y agree, Space photo, Enter keep, R retake, N skip). The `Boss` appears 14 m in front once the scan is kept or skipped, wearing your face (or the mask). Shoot it with left-click. Press R after a death to restart; your scan stays in memory, so the booth is skipped on a restart.
+- The dinosaur spawner is switched off in DinoTest for now ("DinoSpawner (off for boss test)"); tick it to have dinosaurs as well.
+- `FaceScanStation`: new `skipIfAlreadyScanned` option (on by default). If a scan is already in memory, it skips the booth and finishes straight away.
+
 ## 2026-10-11 (boss fight test and tuning)
 
 ### Tested
