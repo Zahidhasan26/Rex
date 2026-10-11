@@ -411,6 +411,7 @@ GameObject:
   - component: {fileID: 7414243973169441573}
   - component: {fileID: 4651193579630421472}
   - component: {fileID: 575237528729061162}
+  - component: {fileID: 3785320698661011312}
   m_Layer: 7
   m_Name: Maip
   m_TagString: Untagged
@@ -502,6 +503,12 @@ MonoBehaviour:
   retreatDistance: 9
   retreatSpeed: 1.6
   windUpTime: {x: 1, y: 2}
+  sidestep: 1
+  strafeSpeed: 1.8
+  strafeLegDuration: {x: 1, y: 2.6}
+  strafeHoldChance: 0.2
+  sidestepInsteadOfPause: 0.65
+  strafeRangeFraction: 0.85
   corpseTime: 4
   animator: {fileID: 1878181657778417154}
   syncAnimationToSpeed: 1
@@ -510,6 +517,9 @@ MonoBehaviour:
   attackTrigger: Attack
   hitTrigger: Hit
   dieTrigger: Die
+  dieIndexParam: DieIndex
+  deathVariants: 3
+  strafeParam: Strafe
 --- !u!114 &7414243973169441573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -718,6 +728,27 @@ MonoBehaviour:
   pitch: 1.15
   pitchVariance: 0.08
   spawnCallChance: 0.6
+--- !u!114 &3785320698661011312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5538207437472497797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5197bb66a3fb7429e35a1a3fb140c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoVariation
+  scaleRange: {x: 0.9, y: 1.1}
+  brightnessRange: {x: 0.82, y: 1.08}
+  tints:
+  - {r: 0.7, g: 0.8, b: 0.52, a: 1}
+  - {r: 0.92, g: 0.68, b: 0.55, a: 1}
+  - {r: 0.66, g: 0.72, b: 0.86, a: 1}
+  - {r: 0.94, g: 0.82, b: 0.6, a: 1}
+  - {r: 0.62, g: 0.6, b: 0.58, a: 1}
+  maxTint: 0.6
 --- !u!1 &6058316138331493632
 GameObject:
   m_ObjectHideFlags: 0

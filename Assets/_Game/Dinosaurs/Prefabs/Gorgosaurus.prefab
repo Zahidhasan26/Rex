@@ -242,6 +242,7 @@ GameObject:
   - component: {fileID: 1519801228177163822}
   - component: {fileID: 4059502859414002917}
   - component: {fileID: 754799690818741749}
+  - component: {fileID: 3307661192408361520}
   m_Layer: 7
   m_Name: Gorgosaurus
   m_TagString: Untagged
@@ -333,6 +334,12 @@ MonoBehaviour:
   retreatDistance: 9
   retreatSpeed: 1.6
   windUpTime: {x: 1, y: 2}
+  sidestep: 1
+  strafeSpeed: 1.8
+  strafeLegDuration: {x: 1, y: 2.6}
+  strafeHoldChance: 0.2
+  sidestepInsteadOfPause: 0.65
+  strafeRangeFraction: 0.85
   corpseTime: 4
   animator: {fileID: 2755650236232453873}
   syncAnimationToSpeed: 0
@@ -341,6 +348,9 @@ MonoBehaviour:
   attackTrigger: Attack
   hitTrigger: Hit
   dieTrigger: Die
+  dieIndexParam: DieIndex
+  deathVariants: 3
+  strafeParam: Strafe
   spitPrefab: {fileID: 6983722379022094238, guid: 4a30ebde3d1e207478036ae3559ead67, type: 3}
   spitOrigin: {fileID: 6756227712920260319}
   spitHeight: 2
@@ -587,6 +597,27 @@ MonoBehaviour:
   - {fileID: 7284108684874275144}
   tailSwayAngle: 2.5
   tailSwayPeriod: 3.6
+--- !u!114 &3307661192408361520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893290893988514483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d5197bb66a3fb7429e35a1a3fb140c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoVariation
+  scaleRange: {x: 0.9, y: 1.1}
+  brightnessRange: {x: 0.82, y: 1.08}
+  tints:
+  - {r: 0.7, g: 0.8, b: 0.52, a: 1}
+  - {r: 0.92, g: 0.68, b: 0.55, a: 1}
+  - {r: 0.66, g: 0.72, b: 0.86, a: 1}
+  - {r: 0.94, g: 0.82, b: 0.6, a: 1}
+  - {r: 0.62, g: 0.6, b: 0.58, a: 1}
+  maxTint: 0.6
 --- !u!1 &4399341197032259678
 GameObject:
   m_ObjectHideFlags: 0

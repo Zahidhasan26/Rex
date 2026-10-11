@@ -6,6 +6,14 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (per-dinosaur variation)
+
+- **`Scripts/DinoVariation.cs`** (on both dinosaur prefabs): picks small random differences once, when a dinosaur spawns.
+  - **Size:** 0.9–1.1× scale. Hitboxes and the NavMeshAgent scale with it; attack reach, footstep stride and voice pitch are adjusted to match (bigger means a longer reach, longer strides and a slightly deeper voice).
+  - **Colour:** a 0.82–1.08 brightness multiplier, plus up to 60% blend toward one of five tints (olive, reddish-brown, slate, sandy, dark). Applied with a MaterialPropertyBlock, so the shared materials are untouched.
+  - The player's hit flash (Zahid's `HitFlash`) also writes the colour and clears it afterwards, so `DinoVariation` puts the tint back whenever no flash is running.
+- Tested: 8 dinosaurs spawned side by side came out at sizes 0.91–1.07 with visibly different tints. No errors.
+
 ## 2026-10-11 (death variants and sidestepping)
 
 ### Animation clips (`Animation/Clips/`): real Unity clips, keyed on every bone
