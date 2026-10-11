@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,6 +22,8 @@ namespace BowGame
         public AudioSource body;
         public AudioClip[] footsteps;
         public AudioClip[] collapseSounds;
+        [Tooltip("Seconds after death before the body-hits-the-ground sound (match the death animation).")]
+        public float collapseDelay = 0.9f;
         [Tooltip("Metres covered per footstep at normal speed (bigger animals take longer strides).")]
         public float strideLength = 2f;
         [Range(0f, 1f)] public float footstepVolume = 0.6f;
@@ -49,24 +52,27 @@ namespace BowGame
 
         void OnEnable()
         {
-            dino.Spawned += OnSpawned;
             dino.Paused += OnPaused;
             dino.ChargeStarted += OnCharge;
             dino.AttackStarted += OnAttack;
             dino.Hit += OnHit;
+            dino.WasHit += OnHurt;
             dino.Died += OnDied;
-            dino.Collapsed += OnCollapsed;
         }
 
         void OnDisable()
         {
-            dino.Spawned -= OnSpawned;
             dino.Paused -= OnPaused;
             dino.ChargeStarted -= OnCharge;
             dino.AttackStarted -= OnAttack;
             dino.Hit -= OnHit;
+            dino.WasHit -= OnHurt;
             dino.Died -= OnDied;
-            dino.Collapsed -= OnCollapsed;
+        }
+
+        void Start()
+        {
+            if (Random.value < spawnCallChance) Play(voice, spawnCalls, 1f);
         }
 
         void Update()
@@ -82,19 +88,28 @@ namespace BowGame
             }
         }
 
-        void OnSpawned() { if (Random.value < spawnCallChance) Play(voice, spawnCalls, 1f); }
         void OnPaused() => Play(voice, pauseGrowls, 0.8f);
         void OnCharge() => Play(voice, chargeRoars, 1f, interrupt: true);
         void OnAttack() => Play(voice, attackSounds, 1f, interrupt: true);
-        void OnDied() => Play(voice, deathSounds, 1f, interrupt: true);
-        void OnCollapsed() => Play(body, collapseSounds, 1f);
+        void OnHurt(HitZone zone) => Play(voice, hurtSounds, 1f, interrupt: true);   // only hits that don't kill
 
+        void OnDied()
+        {
+            Play(voice, deathSounds, 1f, interrupt: true);
+            StartCoroutine(CollapseLater());
+        }
+
+        IEnumerator CollapseLater()
+        {
+            yield return new WaitForSeconds(collapseDelay);
+            Play(body, collapseSounds, 1f);
+        }
+
+        // Arrow impact at the exact hit point, for every hit including the killing one.
         void OnHit(HitZone zone, Vector3 point)
         {
-            var impacts = zone == HitZone.Head ? headHitSounds : bodyHitSounds;
-            var clip = Pick(impacts);
+            var clip = Pick(zone == HitZone.Head ? headHitSounds : bodyHitSounds);
             if (clip != null) AudioSource.PlayClipAtPoint(clip, point, impactVolume);
-            if (zone != HitZone.Head) Play(voice, hurtSounds, 1f, interrupt: true);   // head hits kill: the death sound plays instead
         }
 
         void Play(AudioSource src, AudioClip[] clips, float volume, bool interrupt = false)

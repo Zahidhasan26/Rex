@@ -6,6 +6,25 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (merged latest main)
+
+### Merge
+- Merged `main` into `zach/dinosaurs`. That brings in Halar's procedural animations (`ProceduralDinoAnim`), Zahid's alpha hit-and-retreat, the restored Gorgosaurus acid spit, the opening dinosaur in the spawner, the bow and player updates, and the new architecture rules (per-person branches, rule 14a on stray Unity files).
+- Conflicts:
+  - `Dinosaur.cs`: kept main's version and added three sound hooks: `Paused`, `ChargeStarted` and `Hit(zone, point)`. Main's `AttackStarted`, `WasHit` and `Died` are reused instead of duplicates.
+  - `Maip.prefab`, `Gorgosaurus.prefab`: kept main's version (rule 20). The sound setup was re-added through Unity (below).
+
+### Changed after the merge
+- `DinoAudio.cs` now uses main's events:
+  - The spawn call plays from its own `Start`.
+  - The hurt cry is on `WasHit` (hits that don't kill).
+  - The collapse thud plays `collapseDelay` seconds after `Died`, because Halar's procedural death replaced the tip-over.
+  - Impacts are on `Hit`.
+- `Maip.prefab`, `Gorgosaurus.prefab`: `DinoAudio` re-added on main's versions (same clips, pitch and strides as before, with the voice on the head bone). Collapse delay: Maip 0.8 s, Gorgosaurus 1.1 s.
+
+### Tested
+- `DinoTest` in Play mode with the merged code: dinosaurs spawn, move, attack and play sounds. Forced leg, body and head hits caused no errors.
+
 ## 2026-10-10 (sound)
 
 ### Changed
