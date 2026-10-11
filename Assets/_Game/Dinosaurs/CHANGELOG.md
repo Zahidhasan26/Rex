@@ -6,6 +6,12 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (VR in DinoTest)
+
+### Changed
+- **`Assets/Scenes/DinoTest.unity` now runs in VR.** Zahid's `Player` prefab (XR rig with the bow) is in the scene at the origin, so with the headset connected you see the dinosaurs at real scale and can shoot them (hold the right trigger, pull back, let go).
+- The old desktop setup (Main Camera with the click-to-hit tester, and `DummyPlayer`) is kept but switched off under **"Desktop Test (off - tick to use without headset)"**. To test without the headset, tick that object and untick `Player`.
+
 ## 2026-10-11 (boss animation fix)
 
 ### Fixed
