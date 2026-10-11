@@ -126,7 +126,7 @@ They split these between themselves and say in the team chat who has which. A se
 
 10. Take over `Main`. Choose a play area on the terrain and keep the player inside it (invisible walls or a clearing).
 11. Bake the NavMesh on the terrain with `NavMeshSurface`. Re-bake whenever the terrain changes.
-12. Spawner: spawn points in a ring around the play area, out of the player's direct view. Spawn rate rises over time. Cap the number alive at once (start at 6) to protect the frame rate.
+12. Spawner: spawn points in a ring around the play area, out of the player's direct view. Spawn rate rises over time. Cap the number alive at once (start at 6) to protect the frame rate. Built: `Assets/_Game/World/Scripts/DinoSpawner.cs` and `Assets/_Game/World/Prefabs/DinoSpawner.prefab` (set Spawn Mode to Always in test scenes).
 13. `GameFlow`: the state machine in section 5. Sets `GameRefs.State` and `GameRefs.StateTimeLeft`, raises `GameEvents.StateChanged`.
 14. `GameConfig` asset holding every number for regular and fast mode, so tuning never needs a code change.
 15. When the survive timer ends: stop spawning, clear the remaining dinosaurs, go to `ActOneComplete`. Leave a clearly marked hook here for the final act.
@@ -248,7 +248,7 @@ Assets/
     World/       terrain edits, spawner      (Halar and Zach)
     Flow/        GameFlow, GameConfig        (Halar and Zach)
     Audio/       sounds                      (Saber)
-  Scenes/        Main, Main_Daylight (backup of the midday look), PlayerTest, DinoTest
+  Scenes/        Main, Main_Daylight (backup of the midday look), PlayerTest, DinoTest, CombatTest, DinoShowcase (test scenes)
   TerrainDemoScene_URP/   terrain pack, stored in Git LFS; avoid editing its files, copy what you need into your own folder
 Hardware/        ESP32 firmware              (Saber)
 ARCHITECTURE.md
@@ -256,6 +256,8 @@ CREDITS.md
 ```
 
 Inside each folder use `Scripts/`, `Prefabs/`, `Models/`, `Materials/` as needed.
+
+**Audio:** sounds are currently staged in `Assets/_Game/Dinosaurs/Audio` (checklist in `SOUNDS.md`; `Bow/shoot.ogg` is already there). `Assets/_Game/Audio` is still empty. Before Saber starts the audio pass, agree which folder holds the final sounds. Move files only inside the Unity Editor so the `.meta` links survive.
 
 ## 8. Rules for AI tools
 
@@ -307,7 +309,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 - [x] `Main`, `PlayerTest`, `DinoTest` scenes created in `Assets/Scenes`.
 - [x] Section 3 version table filled in.
 - [x] Teammates added as collaborators on GitHub.
-- [ ] `ARCHITECTURE.md` committed. Message the team: "Main now belongs to Halar and Zach."
+- [x] `ARCHITECTURE.md` committed. Message the team: "Main now belongs to Halar and Zach."
 
 ## 9b. First-time setup for Halar, Zach and Saber
 
@@ -332,7 +334,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 
 ## 11. Things to watch
 
-- **Dinosaur animations.** The Maip model only has an idle and the Gorgosaurus only has a run. We are keeping both and adding attack, hit, death and the Maip's walk in code, by rotating bones from a `ProceduralDinoAnim` script (Halar). Until that lands, dinosaurs tip over when killed.
+- **Dinosaur animations.** The Maip model only had an idle and the Gorgosaurus only a run, so attack, hit, death and the Maip's walk are done in code by rotating bones from a `ProceduralDinoAnim` script (Halar). It is merged into `main`. Re-check the animations after any change to a dinosaur model or prefab.
 - **Model origin and credit.** The Gorgosaurus is listed as CC BY 4.0, which requires credit, and its page says it comes from a commercial *Walking with Dinosaurs* game. Put both models' authors and links in `CREDITS.md`, and check the event rules on third-party assets.
 - **Windows firewall.** The first time the game listens on the network, Windows asks for permission: allow Unity on private networks, and set the hotspot as a Private network. Otherwise EMG data silently never arrives.
 - **EMG arm and controller.** The right arm wears the sensor, so keep the right hand's buttons unused. Gripping a controller tenses the forearm and can fire arrows by accident.
