@@ -196,6 +196,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.HitZoneMarker
   zone: 2
+--- !u!1 &2135142755276451586
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6756227712920260319}
+  m_Layer: 0
+  m_Name: SpitMouth
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6756227712920260319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2135142755276451586}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.13785286, y: 1.2024157, z: 0.1095596}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4855658379640325991}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3893290893988514483
 GameObject:
   m_ObjectHideFlags: 0
@@ -210,6 +241,7 @@ GameObject:
   - component: {fileID: 5312591629203523013}
   - component: {fileID: 1519801228177163822}
   - component: {fileID: 4059502859414002917}
+  - component: {fileID: 754799690818741749}
   m_Layer: 7
   m_Name: Gorgosaurus
   m_TagString: Untagged
@@ -303,16 +335,16 @@ MonoBehaviour:
   windUpTime: {x: 1, y: 2}
   corpseTime: 4
   animator: {fileID: 2755650236232453873}
-  syncAnimationToSpeed: 1
+  syncAnimationToSpeed: 0
   animationSpeedRange: {x: 0.35, y: 1.4}
   speedParam: Speed
   attackTrigger: Attack
   hitTrigger: Hit
   dieTrigger: Die
   spitPrefab: {fileID: 6983722379022094238, guid: 4a30ebde3d1e207478036ae3559ead67, type: 3}
-  spitOrigin: {fileID: 4855658379640325991}
+  spitOrigin: {fileID: 6756227712920260319}
   spitHeight: 2
-  spitDelay: 0.5
+  spitDelay: 0.15
   needLineOfSight: 1
   sightBlockers:
     serializedVersion: 2
@@ -524,6 +556,37 @@ MonoBehaviour:
   pitch: 0.8
   pitchVariance: 0.08
   spawnCallChance: 0.6
+--- !u!114 &754799690818741749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3893290893988514483}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d614d61d5cbe7f4294d4aa51054a79e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoIdlePose
+  poseTime: 0.5
+  secondLegTime: 0
+  secondLegRoot: {fileID: 1420873224962554218}
+  standingSpeed: 0.4
+  blendSpeed: 4
+  breathBones:
+  - {fileID: 4858739365174359260}
+  breathAngle: 1.5
+  breathPeriod: 2.6
+  tailBones:
+  - {fileID: 2579540261370560971}
+  - {fileID: 2014570866557030839}
+  - {fileID: 4293502172592141784}
+  - {fileID: 5275720789430035966}
+  - {fileID: 8848579278559027373}
+  - {fileID: 1941545721091951497}
+  - {fileID: 7284108684874275144}
+  tailSwayAngle: 2.5
+  tailSwayPeriod: 3.6
 --- !u!1 &4399341197032259678
 GameObject:
   m_ObjectHideFlags: 0
@@ -1041,6 +1104,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4035562012936842069}
+    - targetCorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6756227712920260319}
     - targetCorrespondingSourceObject: {fileID: 1365118069703089724, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5511643812802829893}
@@ -1132,6 +1198,11 @@ Animator:
 --- !u!4 &4855658379640325991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+  m_PrefabInstance: {fileID: 3531157036797686762}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &4858739365174359260 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -978260612115151050, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
   m_PrefabInstance: {fileID: 3531157036797686762}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &5275720789430035966 stripped
