@@ -60,6 +60,11 @@ namespace BowGame
             m["Skin"] = Lit("Boss_Skin", new Color(0.86f, 0.84f, 0.8f), 0.3f, null, null);
             m["Face"] = Lit("Boss_Face", Color.white, 0.25f, null, null);
             m["Hair"] = Lit("Boss_Hair", new Color(0.07f, 0.055f, 0.05f), 0.45f, null, null);
+            // 3D hair presets: strand texture, tinted per boss by BossFace, both sides drawn (long hair is a single sheet)
+            var strands = Lit("Boss_HairStrands", new Color(0.12f, 0.09f, 0.07f), 0.38f, TexDir + "/Hair_Strands.png", null);
+            strands.SetFloat("_Cull", 0f);
+            strands.doubleSidedGI = true;
+            m["Strands"] = strands;
             var orb = Lit("Boss_Orb", new Color(0.12f, 0.02f, 0.2f), 0.8f, null, null);
             orb.EnableKeyword("_EMISSION");
             orb.SetColor("_EmissionColor", new Color(0.45f, 0.1f, 1f) * 1.6f);
@@ -106,6 +111,7 @@ namespace BowGame
             {
                 { "material_7", mats["Suit"] }, { "material_0", mats["Hands"] },
                 { "Boss_Skin", mats["Skin"] }, { "Boss_Face", mats["Face"] }, { "Boss_Hair", mats["Hair"] },
+                { "Boss_HairStrands", mats["Strands"] },
             };
             foreach (var kv in remap) mi.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), kv.Key), kv.Value);
 

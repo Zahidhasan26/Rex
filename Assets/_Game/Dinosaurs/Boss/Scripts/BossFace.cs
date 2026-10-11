@@ -17,6 +17,8 @@ namespace BowGame
     // with those, so there is no visible seam. Nothing is drawn over the face.
     //
     // Works in edit mode too: assign presetPhoto and adjust photoCrop to see the result in the Scene view.
+    public enum HairStyle { Auto, None, Short, Medium, Long, Curly }
+
     [ExecuteAlways]
     public class BossFace : MonoBehaviour
     {
@@ -32,6 +34,16 @@ namespace BowGame
         public Rect photoCrop = new Rect(0f, 0f, 1f, 1f);
         [Tooltip("Flip the photo left-right (selfies are often mirrored).")]
         public bool mirror = false;
+
+        [Header("Hair")]
+        [Tooltip("3D hair added on top of the head. Auto picks one from the photo (bald, short, medium, long or curly).")]
+        public HairStyle hairStyle = HairStyle.Auto;
+        [Tooltip("Style used with the mask (no photo) when hairStyle is Auto.")]
+        public HairStyle maskHairStyle = HairStyle.Short;
+        [Tooltip("The strand texture is mid-grey; this brightens the tint so the hair ends up close to the sampled colour.")]
+        [Range(0.5f, 2.5f)] public float hairTintBoost = 1.45f;
+        [Tooltip("Auto: how busy the hair texture must be to count as curly. Lower it if curly hair isn't detected, raise it if straight hair is called curly.")]
+        [Range(0.01f, 0.2f)] public float curlyBusyness = 0.05f;
 
         [Header("Blending")]
         [Tooltip("How far in from the edges of the picture it fades into the hair and skin colours (fraction of the picture).")]
@@ -52,6 +64,8 @@ namespace BowGame
         bool dirty = true;
 
         public Color SkinTone { get; private set; }
+        public HairStyle ShownHairStyle { get; private set; }
+        public string HairReason { get; private set; }
         public Color HairColour { get; private set; }
 
         void OnEnable()
@@ -140,6 +154,95 @@ namespace BowGame
             Set(faceIndex, Color.white, built);
             if (skinIndex >= 0) Set(skinIndex, SkinTone, null);
             if (hairIndex >= 0) Set(hairIndex, HairColour, null);
+
+            HairStyle style = hairStyle;
+            if (style == HairStyle.Auto)
+            {
+                if (photo != null) style = DetectHair(photo, fromScan ? new Rect(0f, 0f, 1f, 1f) : photoCrop, !fromScan && mirror);
+                else { style = maskHairStyle; HairReason = "no photo"; }
+            }
+            else HairReason = "set by hand";
+            ShowHair(style);
+        }
+
+        // ---------- 3D hair ----------
+
+        void ShowHair(HairStyle style)
+        {
+            ShownHairStyle = style;
+            Color tint = HairColour * hairTintBoost;
+            tint.a = 1f;
+            foreach (var r in GetComponentsInChildren<Renderer>(true))
+            {
+                if (!r.name.StartsWith("Hair_")) continue;
+                bool on = r.name == "Hair_" + style;
+                if (r.enabled != on) r.enabled = on;
+                if (!on) continue;
+                if (mpb == null) mpb = new MaterialPropertyBlock();
+                r.GetPropertyBlock(mpb);
+                mpb.SetColor("_BaseColor", tint);
+                mpb.SetColor("_Color", tint);
+                r.SetPropertyBlock(mpb);
+            }
+        }
+
+        // Rough look at the photo to pick a hair style. Hair pixels are ones closer to the sampled hair colour
+        // than to the skin colour. Always check the result and set hairStyle by hand if it guessed wrong.
+        HairStyle DetectHair(Texture2D photo, Rect crop, bool flip)
+        {
+            float hairSkin = ColourDistance(HairColour, SkinTone);
+            if (hairSkin < 0.12f) { HairReason = "top of the head looks like skin"; return HairStyle.None; }
+
+            float longFrac = (HairFraction(photo, crop, flip, 0.03f, 0.15f, 0.06f, 0.36f) + HairFraction(photo, crop, flip, 0.85f, 0.97f, 0.06f, 0.36f)) * 0.5f;
+            float templeFrac = (HairFraction(photo, crop, flip, 0.04f, 0.17f, 0.5f, 0.72f) + HairFraction(photo, crop, flip, 0.83f, 0.96f, 0.5f, 0.72f)) * 0.5f;
+            float busy, evenness;
+            HairTexture(photo, crop, flip, out busy, out evenness);
+
+            if (busy > curlyBusyness && evenness > 0.65f) { HairReason = string.Format("curly-looking hair (busy {0:0.000}, even {1:0.00})", busy, evenness); return HairStyle.Curly; }
+            if (longFrac > 0.45f) { HairReason = string.Format("hair below the ears ({0:0.00})", longFrac); return HairStyle.Long; }
+            if (templeFrac > 0.4f) { HairReason = string.Format("hair at the temples ({0:0.00})", templeFrac); return HairStyle.Medium; }
+            HairReason = string.Format("little hair at the sides ({0:0.00})", templeFrac);
+            return HairStyle.Short;
+        }
+
+        static float ColourDistance(Color a, Color b)
+        {
+            float dr = a.r - b.r, dg = a.g - b.g, db = a.b - b.b;
+            return Mathf.Sqrt(dr * dr + dg * dg + db * db);
+        }
+
+        float HairFraction(Texture2D photo, Rect crop, bool flip, float u0, float u1, float v0, float v1)
+        {
+            int hits = 0, n = 0;
+            for (int i = 0; i < 8; i++)
+                for (int j = 0; j < 10; j++)
+                {
+                    Color c = Sample(photo, crop, flip, Mathf.Lerp(u0, u1, (i + 0.5f) / 8f), Mathf.Lerp(v0, v1, (j + 0.5f) / 10f)) * photoBrightness;
+                    float dh = ColourDistance(c, HairColour), ds = ColourDistance(c, SkinTone);
+                    if (dh < 0.6f * ds && dh < 0.3f) hits++;
+                    n++;
+                }
+            return (float)hits / n;
+        }
+
+        // How "busy" the hair at the top of the head is. Curls change brightness in every direction; straight hair
+        // mostly changes across the strands. Returns the average change and how even it is across directions (0..1).
+        void HairTexture(Texture2D photo, Rect crop, bool flip, out float busy, out float evenness)
+        {
+            float step = 2f / Mathf.Max(64f, photo.width * crop.width);
+            float h = 0f, v = 0f; int n = 0;
+            for (int i = 0; i < 16; i++)
+                for (int j = 0; j < 6; j++)
+                {
+                    float u = Mathf.Lerp(0.3f, 0.7f, (i + 0.5f) / 16f), w = Mathf.Lerp(0.86f, 0.97f, (j + 0.5f) / 6f);
+                    float a = Sample(photo, crop, flip, u, w).grayscale;
+                    h += Mathf.Abs(a - Sample(photo, crop, flip, u + step, w).grayscale);
+                    v += Mathf.Abs(a - Sample(photo, crop, flip, u, w + step).grayscale);
+                    n++;
+                }
+            h /= n; v /= n;
+            busy = (h + v) * 0.5f;
+            evenness = h + v > 1e-5f ? 1f - Mathf.Abs(h - v) / (h + v) : 0f;
         }
 
         void Set(int index, Color c, Texture t)

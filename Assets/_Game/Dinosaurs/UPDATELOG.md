@@ -6,6 +6,21 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (3D hair presets for the boss)
+
+- **Four 3D hair meshes in `Boss.fbx`**, on the head bone: `Hair_Short`, `Hair_Medium`, `Hair_Long` (with a sheet falling to the shoulders, which follows the upper body), and `Hair_Curly` (big rounded volume with bumps). Plus "None" for bald.
+  - Each stops at the hairline, well above the forehead, and its thickness tapers to nothing at the edge, so it blends into the photo and never covers the face.
+- **Material `Boss_HairStrands`**: a generated strand texture (`Textures/Hair_Strands.png`), drawn on both sides. `BossFace` tints it with the hair colour sampled from the photo.
+- **`BossFace` picks the style** (`hairStyle`, default **Auto**), and the inspector shows what it chose and why:
+  - bald if the top of the picture is skin-coloured;
+  - Long if there's hair below the ears at the sides;
+  - Curly if the hair at the top has a busy texture in every direction (tunable with `curlyBusyness`);
+  - Medium if there's hair at the temples;
+  - otherwise Short.
+  - Without a photo, the mask gets `maskHairStyle` (Short).
+  - Set `hairStyle` by hand to override.
+- Tested with drawn test heads (no real photos): short → Short, medium → Medium, long → Long, bald → None. The drawn curly head came out Short, because flat cartoon curls don't have photo texture; with a real photo, check the result and set Curly by hand if needed. All styles render and follow the head. No errors.
+
 ## 2026-10-11 (face photos folder)
 
 - **`Boss/FacePhotos/`**: drop the presenter's photo here.

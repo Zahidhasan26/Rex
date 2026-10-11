@@ -455,22 +455,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1724fa5b95c3259448b8009ecd7d7362, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.BossFace
-  headRenderer: {fileID: 0}
+  headRenderer: {fileID: 4615101169629069328}
   skinMaterial: Boss_Skin
   faceMaterial: Boss_Face
-  photoBox:
+  hairMaterial: Boss_Hair
+  presetPhoto: {fileID: 0}
+  photoCrop:
     serializedVersion: 2
-    x: 0.08
-    y: 0.115
-    width: 0.84
-    height: 0.835
-  ovalSize: {x: 0.8, y: 0.94}
-  feather: 0.2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  mirror: 0
+  hairStyle: 0
+  maskHairStyle: 2
+  hairTintBoost: 1.45
+  edgeFade: 0.1
+  photoBrightness: 0.95
+  earLine: 0.47
   textureSize: 512
-  defaultFace: {fileID: 0}
   maskColour: {r: 0.86, g: 0.84, b: 0.8, a: 1}
-  toneBlend: 0.1
-  photoBrightness: 0.92
+  maskHairColour: {r: 0.07, g: 0.055, b: 0.05, a: 1}
 --- !u!114 &6879939706756789250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -620,9 +625,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -4016820018952353232, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -1959853456997149404, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
       propertyPath: m_Name
       value: Model
+      objectReference: {fileID: 0}
+    - target: {fileID: 5824783154838790382, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
       propertyPath: m_Controller
@@ -661,6 +678,11 @@ Transform:
 --- !u!95 &4239895579706061392 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
+  m_PrefabInstance: {fileID: 7763562788682747841}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &4615101169629069328 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3148461677844582353, guid: 3fc152b3479343e48b153f7a97e62d62, type: 3}
   m_PrefabInstance: {fileID: 7763562788682747841}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &7517977006225382249 stripped

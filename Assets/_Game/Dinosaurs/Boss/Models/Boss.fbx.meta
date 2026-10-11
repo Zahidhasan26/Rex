@@ -17,6 +17,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Boss_HairStrands
+    second: {fileID: 2100000, guid: 92fb9f886a4f89645900851f6c7f463b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: Boss_Skin
     second: {fileID: 2100000, guid: 0aef23b5a36f2c24e8f65a21cec9c457, type: 2}
   - first:
