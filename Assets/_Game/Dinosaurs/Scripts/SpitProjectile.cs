@@ -15,6 +15,13 @@ namespace BowGame
         public float lifeTime = 5f;
         [Tooltip("Splash spawned where the spit lands or hits the player.")]
         public GameObject impactPrefab;
+        [Tooltip("The spray thins out as it travels: new particles get fainter until this distance (metres).")]
+        public float fadeDistance = 14f;
+        [Range(0f, 1f)] public float alphaAtFadeDistance = 0.2f;
+
+        ParticleSystem[] systems;
+        ParticleSystem.MinMaxGradient[] baseColors;
+        Vector3 startPos;
 
         Transform target;
         Transform shooter;
@@ -43,6 +50,10 @@ namespace BowGame
             }
 
             live = true;
+            startPos = transform.position;
+            systems = GetComponentsInChildren<ParticleSystem>();
+            baseColors = new ParticleSystem.MinMaxGradient[systems.Length];
+            for (int i = 0; i < systems.Length; i++) baseColors[i] = systems[i].main.startColor;
             if (velocity.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(velocity);
             Destroy(gameObject, lifeTime);
         }
@@ -79,7 +90,28 @@ namespace BowGame
 
             transform.position += step;
             if (velocity.sqrMagnitude > 0.001f) transform.rotation = Quaternion.LookRotation(velocity);
+            FadeWithDistance();
         }
+
+        // Particles emitted further from the mouth start fainter, so the spray thins out over distance.
+        void FadeWithDistance()
+        {
+            if (systems == null || fadeDistance <= 0f) return;
+            float t = Mathf.Clamp01(Vector3.Distance(startPos, transform.position) / fadeDistance);
+            float k = Mathf.Lerp(1f, alphaAtFadeDistance, t);
+            for (int i = 0; i < systems.Length; i++)
+            {
+                if (systems[i] == null) continue;
+                var b = baseColors[i];
+                var main = systems[i].main;
+                if (b.mode == ParticleSystemGradientMode.TwoColors)
+                    main.startColor = new ParticleSystem.MinMaxGradient(Fade(b.colorMin, k), Fade(b.colorMax, k));
+                else if (b.mode == ParticleSystemGradientMode.Color)
+                    main.startColor = new ParticleSystem.MinMaxGradient(Fade(b.color, k));
+            }
+        }
+
+        static Color Fade(Color c, float k) { c.a *= k; return c; }
 
         void Finish(Vector3 point, Vector3 normal, bool onPlayer)
         {

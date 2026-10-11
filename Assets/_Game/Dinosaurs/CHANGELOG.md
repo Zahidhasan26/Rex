@@ -6,6 +6,16 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (lighter spit, idle while spitting)
+
+### Changed
+- **Less smoky spit.** The mist is fainter (alpha 0.2–0.3, was 0.45–0.55), smaller, fewer puffs and shorter-lived, and it no longer hangs in the air. The splash mist is lighter too.
+- **No more cone shape.** Mist and droplets now scatter in a loose sphere around the travelling core (random directions) and inherit its speed, so the spray is an irregular cloud that moves with the spit instead of a widening cone from the mouth.
+- **Fades over distance.**
+  - `SpitProjectile` has new fields `fadeDistance` (14 m) and `alphaAtFadeDistance` (0.2). Particles emitted further from the mouth start fainter.
+  - Every particle also fades over its own lifetime.
+  - The core (`Clump`, now using the droplet texture) fades from full to 25% as it flies.
+
 ## 2026-10-11 (misty spit)
 
 ### Changed

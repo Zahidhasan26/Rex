@@ -6,6 +6,12 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (Gorgosaurus idle)
+
+- **`Scripts/DinoIdlePose.cs`** (on `Gorgosaurus.prefab`): the Gorgosaurus only has a run clip, so when standing it used to run in place, including while spitting. Now, when it stands still or attacks, it blends (0.25 s) into a planted standing pose. The pose is built from two frames of the run clip: the body and left leg at 50% (left foot down), and the right leg at 0% (right foot down). It also gets slow breathing in the chest (±1.5°, 2.6 s) and a lazy tail sway (±2.5°, 3.6 s).
+  - It runs before `ProceduralDinoAnim`, so Halar's open-mouth attack, hit flinch and death play on top of the standing pose.
+  - Tested: while spitting, both back feet are on the ground (0.30 / 0.23 m, same as the ground contact in the run), the mouth is open and the spit leaves the jaws.
+
 ## 2026-10-11 (spray-style acid spit)
 
 ### New
