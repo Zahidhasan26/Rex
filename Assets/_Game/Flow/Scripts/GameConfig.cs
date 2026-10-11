@@ -9,7 +9,7 @@ namespace BowGame
     {
         [Header("Round")]
         [Tooltip("Length of the fight in seconds, including the alpha Maip.")]
-        public float roundSeconds = 45f;
+        public float roundSeconds = 60f;
         public float countdownSeconds = 3f;
         public float playerHealth = 250f;
 

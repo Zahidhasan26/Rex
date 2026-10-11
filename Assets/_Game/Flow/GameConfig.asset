@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19085cf0bab87a1439f1dc1009aa0b6e, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.GameConfig
-  roundSeconds: 45
+  roundSeconds: 60
   countdownSeconds: 3
   playerHealth: 250
   controlsSeconds: 7

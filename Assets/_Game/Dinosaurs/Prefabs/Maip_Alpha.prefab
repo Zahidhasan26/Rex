@@ -1,5 +1,72 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &535424650803211752
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3144438569063841119}
+  - component: {fileID: 117524025309546763}
+  - component: {fileID: 4928423889980958268}
+  m_Layer: 7
+  m_Name: Hitbox_Fallback
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3144438569063841119
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535424650803211752}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7081020493754668062}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &117524025309546763
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535424650803211752}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.7092718, y: 3.8145783, z: 5.877139}
+  m_Center: {x: -0.07552512, y: 0.1966713, z: -0.017742217}
+--- !u!114 &4928423889980958268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 535424650803211752}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c986d140e05e1441953e99dc1c19f57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.HitZoneMarker
+  zone: 1
 --- !u!1 &932499656521165230
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,6 +499,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4727682487691531128}
+  - {fileID: 3144438569063841119}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!195 &6384607038746517624
@@ -471,6 +539,7 @@ MonoBehaviour:
   bodyHitsToKill: 5
   headHitsToKill: 2
   headShotWorth: 2
+  fragileAfterBites: 2
   legSlowMultiplier: 0.4
   legSlowDuration: 4
   moveSpeed: 5.2
@@ -908,7 +977,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fa5224d51818f154e93a5913eeb36584, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.106141925
+      value: -1.0896592
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: fa5224d51818f154e93a5913eeb36584, type: 3}
       propertyPath: m_LocalPosition.z
