@@ -142,7 +142,7 @@ namespace BowGame
             }
 
             yield return new WaitForSeconds(recoverTime);
-            isAttacking = false;
+            EndAttack();
         }
 
         IEnumerator Charge(Transform player)
@@ -181,7 +181,14 @@ namespace BowGame
                 GameEvents.RaisePlayerHit(smashDamage, transform.position);
 
             yield return new WaitForSeconds(smashRecover);
+            EndAttack();
+        }
+
+        // The cooldown starts when an attack finishes, so a long charge isn't followed straight away by another attack.
+        void EndAttack()
+        {
             isAttacking = false;
+            nextAttackTime = Mathf.Max(nextAttackTime, Time.time + attackCooldown * UnityEngine.Random.Range(0.6f, 0.9f));
         }
 
         protected override void Die()

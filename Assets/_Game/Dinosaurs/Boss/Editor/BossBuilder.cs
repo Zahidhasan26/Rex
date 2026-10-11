@@ -36,6 +36,8 @@ namespace BowGame
             var orb = BuildOrb(mats["Orb"]);
             BuildBossPrefab(controller, orb, mats["Orb"]);
             AssetDatabase.SaveAssets();
+            // Re-import the prefab so open scenes pick up the controller straight away.
+            AssetDatabase.ImportAsset(PrefabDir + "/Boss.prefab", ImportAssetOptions.ForceUpdate);
             Debug.Log("BossBuilder: boss assets built.");
         }
 
@@ -133,9 +135,12 @@ namespace BowGame
 
         static AnimatorController BuildController()
         {
+            // Rebuild the existing controller in place. Deleting and re-creating it would leave every open
+            // scene and prefab instance pointing at a dead controller, so the boss would stand still.
             string path = AnimDir + "/Boss.controller";
-            AssetDatabase.DeleteAsset(path);
-            var ac = AnimatorController.CreateAnimatorControllerAtPath(path);
+            var ac = AssetDatabase.LoadAssetAtPath<AnimatorController>(path);
+            if (ac == null) ac = AnimatorController.CreateAnimatorControllerAtPath(path);
+            else ClearController(ac, path);
             ac.AddParameter("Speed", AnimatorControllerParameterType.Float);
             ac.AddParameter("Strafe", AnimatorControllerParameterType.Float);
             ac.AddParameter("Charging", AnimatorControllerParameterType.Bool);
@@ -206,6 +211,19 @@ namespace BowGame
             }
             EditorUtility.SetDirty(ac);
             return ac;
+        }
+
+        static void ClearController(AnimatorController ac, string path)
+        {
+            foreach (var p in ac.parameters) ac.RemoveParameter(p);
+            var sm = ac.layers[0].stateMachine;
+            foreach (var t in sm.anyStateTransitions) sm.RemoveAnyStateTransition(t);
+            foreach (var t in sm.entryTransitions) sm.RemoveEntryTransition(t);
+            foreach (var st in sm.states) sm.RemoveState(st.state);
+            foreach (var sub in sm.stateMachines) sm.RemoveStateMachine(sub.stateMachine);
+            foreach (var o in AssetDatabase.LoadAllAssetsAtPath(path))
+                if (o is BlendTree) Object.DestroyImmediate(o, true);
+            while (ac.layers.Length > 1) ac.RemoveLayer(ac.layers.Length - 1);
         }
 
         static AnimatorState State(AnimatorStateMachine sm, string name, Motion m, float x, float y)

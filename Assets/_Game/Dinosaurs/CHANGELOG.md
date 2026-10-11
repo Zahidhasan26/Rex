@@ -6,6 +6,12 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (boss animation fix)
+
+### Fixed
+- **The boss stood still with no animation.** Re-running `BossBuilder` deleted and re-created `Boss.controller`, which left the open scene and the prefab pointing at a controller that no longer existed. The builder now rebuilds the controller in place and re-imports the prefab at the end. BossTest now plays idle, walk, sidestep, backing away, throw, charge wind-up, run, smash and the deaths.
+- Two boss script updates hadn't reached the project (the copy on disk was older). They are in now: the attack cooldown starts when an attack ends, so a charge-smash is no longer followed straight away by a second smash, and the orb glow is toned down.
+
 ## 2026-10-11 (final boss)
 
 ### Changed
