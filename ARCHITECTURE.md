@@ -116,10 +116,12 @@ They split these between themselves and say in the team chat who has which. A se
 2. Convert materials to URP if they show pink. Fix scale so the dinosaurs are the right size next to the player.
 3. One prefab per dinosaur, each with: `NavMeshAgent`, Animator, a script implementing `IDamageable`, and three hitbox colliders (head, body, legs), each with a `HitZoneMarker`, on the `Dinosaur` layer.
 4. Behaviour: move toward `GameRefs.PlayerHead`, attack in range, play death animation, then remove the body after a few seconds.
-5. Damage rules: head = instant kill, body = 3 hits, legs = slowed.
-6. Roles:
-   - **Maip:** fast melee attacker (bite, hit-and-retreat).
-   - **Gorgosaurus:** slower, tougher. Bites up close, and from range sprays **spit**: a brownish, natural-looking spray of saliva with its own attack animation (Zach, replacing the old glowing glob). Its roars stay as they are.
+5. Damage rules: head = instant kill (the alpha needs 2), body = 3 hits (the alpha needs 5), legs = slowed. Head and body hits add up.
+6. The dinosaurs and the round:
+   - **Opening: alpha Maip** (`Maip_Alpha` prefab, full-quality model). Spawns alone in front of the player. Charges (a little slower than the first combat demo, still fast enough to catch the player), bites once at full lunge so it feels real (its head stops just short of the player's face and never passes through), then backs away about 9 m while still facing the player, glares for 1–2 s and charges again. It prefers to bite while the player is looking at it, waiting at most 1.5 s. Takes 2 headshots or 5 body shots. **Nothing else spawns until it is dead.**
+   - **Waves** start after the alpha dies, using Zach's natural movement (weaving, flanking, pauses): mostly Gorgosauruses, plus **at least one light Maip alive at all times**.
+   - **Light Maip** (`Maip` prefab, light model): melee biter, slower than the alpha and bites less often. One headshot or 3 body shots.
+   - **Gorgosaurus:** ranged only. Stops at range and spits at where the player is standing: stand still and it hits (so the vest fires), sidestep with the joystick and it misses. Low damage. The spit is being restyled (Zach) into a brownish, natural-looking spray of saliva with its own attack animation. Its roars stay as they are.
    - **Death sounds must be different from the roars.** Right now a dinosaur's death cry is one of the roar clips (`dino_roar_A_02`), so a kill sounds like an attack. Use a separate death sound (see `SOUNDS.md`).
 7. Attacks call `GameEvents.RaisePlayerHit(damage, attackerPosition)`. Never touch the player's scripts directly.
 8. On death, call `GameEvents.RaiseDinoDied(gameObject)`.
@@ -330,7 +332,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 | 0 | Pre-handover checklist | Zahid |
 | 1 | Each lane works alone with stand-ins: bow fires in `PlayerTest`; one dinosaur walks, attacks and dies in `DinoTest`; spawner and timer run in `Main` with placeholder cubes | Zahid, Halar, Zach |
 | 2 | First merge: `Player` prefab and one dinosaur prefab placed in `Main`; arrows kill dinosaurs; dinosaurs hurt the player | Halar or Zach places (whoever holds the lock), all test |
-| 3 | Gorgosaurus spit restyle (brown saliva spray, new animation), separate death sounds, difficulty ramp, HUD | Halar, Zach, Zahid |
+| 3 | Alpha Maip opening tested in the headset, Gorgosaurus spit restyle (brown saliva spray, new animation), separate death sounds, difficulty ramp, HUD | Halar, Zach, Zahid |
 | 4 | Real EMG and vest connected | Saber, Zahid |
 | 5 | Fast mode played start to finish by someone outside the team; fix what confuses them | All |
 | 6 | Act 1 frozen. Only then start the final act | All |

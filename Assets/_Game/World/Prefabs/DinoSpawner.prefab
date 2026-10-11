@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36d2d020956f6dd41b215b261ab557c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoSpawner
+  openingDino: {fileID: 740058287092723877, guid: e40ebf379a6019a408c09d55220166cc, type: 3}
+  openingDistance: 32
+  delayAfterOpening: 3
   dinosaurs:
   - prefab: {fileID: 740058287092723877, guid: ad65298fa70c9ec4f8ed25ae915864d3, type: 3}
     weight: 1

@@ -493,7 +493,7 @@ MonoBehaviour:
   biteDelay: 0.35
   recoverTime: 0.4
   biteReachMultiplier: 1.2
-  mouth: {fileID: 0}
+  mouth: {fileID: 4196683119877109572}
   faceGap: 0.45
   waitForPlayerLook: 0
   lookAngle: 55
