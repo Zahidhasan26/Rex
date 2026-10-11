@@ -27,7 +27,7 @@ We finish **Act 1** completely before anything else is started.
 - **PC VR, tethered.** The game runs on Zahid's laptop (Windows) and is shown in a Meta Quest Pro over a Link cable. We do **not** build an Android app.
 - **Render pipeline: URP.** Never add HDRP assets or HDRP shaders.
 - **VR stack:** OpenXR plus the XR Interaction Toolkit, as set up by Unity's VR template.
-- **Network:** the laptop, the EMG armband and the vest are all on one phone hotspot (2.4 GHz).
+- **Network:** one ESP32 runs both the EMG armband and the vest (`Hardware/rex_esp32`). The laptop and the ESP32 must be on the same Wi-Fi: both on Halar's phone hotspot (2.4 GHz). The headset uses the Link cable, so the laptop doesn't need the venue Wi-Fi during play.
 - **Performance target:** steady 72 frames per second in the headset. If it drops, lower terrain grass and tree density first.
 
 ```
@@ -157,15 +157,13 @@ They split these between themselves and say in the team chat who has which. A se
 
 Fast mode is the demo mode. Build and test it first.
 
-## 5b. After Act 1 (planned, not built yet)
+## 5b. After Act 1
 
-Nothing in this section has code yet. Build it only after Act 1 is approved and working.
-
-**Cutscene (end of Act 1, start of Part 2)**
-- When the Act 1 round ends, the player is frozen where they stand (no movement, no bow).
-- A video plays on a large screen in front of them: meteors falling on the terrain (made from the map screenshots in `Logs/MapShotsOut`), with sound effects and a voice-over baked into the video.
-- Video file: `Assets/_Game/Flow/Video/` (team supplies it). Played with Unity's `VideoPlayer` on a world-space quad in front of the player's head, with audio from the video.
-- When the video ends: Part 2 starts.
+**Cutscene (built)**
+- When the 60 s round ends: "You survived!", the dinosaurs are cleared, the music fades out and the world goes dark.
+- The video plays on a large screen (about 4.5 m wide, 5 m away) in front of where the player is looking, with its own sound. Walking is paused. A (or R / Space on the keyboard) skips it.
+- Video file: `Assets/_Game/Flow/Video/cutscene_meteor.mp4`, set in `GameConfig` (`cutscene`, `cutsceneDistance`, `cutsceneWidth`, `cutsceneVolume`). Code: `GameFlow.PlayCutscene()`.
+- When the video ends: "To be continued", A to play again. Part 2 starts here once it exists (look for `PART 2 HOOK` in `GameFlow.cs`).
 
 **Part 2: boss fight (only if there is time)**
 - A second round against the boss, as in the original plan (fixed body, uploaded-photo face, kill him in time or he snaps his fingers).
@@ -250,8 +248,8 @@ Also in Core, written by Zahid:
 
 | Link | Direction | Format |
 |---|---|---|
-| EMG | Armband to laptop, UDP port **5005**, broadcast | Text number `0.00` to `1.00`, about 50 per second |
-| Vest | Laptop to vest, UDP port **5006**, broadcast | Text `L,200`, `R,200` or `F,200` (side, strength 0 to 255) |
+| EMG | Armband to laptop, UDP port **5005**, broadcast | Text number `0.000` to `1.000` (raw level; the game calibrates relax/flex), about 50 per second |
+| Vest | Laptop to vest, UDP port **5006**, broadcast | Text `L,200`, `R,200` or `F,200` (side, strength 0 to 255). Relay board: L = left motor, R = right, F (front hit) = all three; stronger = longer buzz |
 
 Saber: check this against the vest brief you were sent. If the brief says something different, tell Zahid and we pick one.
 

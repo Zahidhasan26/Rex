@@ -19,8 +19,8 @@ namespace BowGame
         public float flexSeconds = 3f;
         public int practiceShots = 3;
         [Tooltip("Seconds of joystick walking forward, then backward, before the fight (not shown to the player).")]
-        public float walkForwardSeconds = 4f;
-        public float walkBackSeconds = 3f;
+        public float walkForwardSeconds = 2f;
+        public float walkBackSeconds = 2f;
         [Tooltip("Restart goes straight to the ring and the countdown.")]
         public bool skipTutorialOnRestart = true;
 
@@ -44,6 +44,15 @@ namespace BowGame
         public AudioClip calmMusic;
         public AudioClip battleMusic;
         [Range(0f, 1f)] public float musicVolume = 0.5f;
+        [Tooltip("Battle music is quieter so it sits under the roars and bites.")]
+        [Range(0f, 1f)] public float battleVolume = 0.35f;
         public float musicFade = 2f;
+
+        [Header("End of Act 1 cutscene (plays on a big screen in front of the player)")]
+        public UnityEngine.Video.VideoClip cutscene;
+        public float cutsceneDistance = 5f;
+        [Tooltip("Screen width in metres; height follows the video's shape.")]
+        public float cutsceneWidth = 4.5f;
+        [Range(0f, 1f)] public float cutsceneVolume = 1f;
     }
 }

@@ -24,7 +24,9 @@ TODO: add one row per sound (file, site, author, license). `Bow/shoot.ogg` is al
 | File | Site / link | Author | License |
 |---|---|---|---|
 | `Bow/shoot.ogg` | TODO | TODO | TODO |
+| `Music/music_calm_forest.mp3` (calm music, a 1:49 cut of a 3-hour ambience video) | [YouTube: "Dinosaur Forest - 3 hours - Dinosaur Ambience"](https://youtu.be/YlWSmQ293qU) | TODO: channel name | TODO: check the video description for reuse terms |
+| `Music/battle.mp3` (battle music, "Into the Deep Jungle") | Generated with [Suno](https://suno.com/s/j3t35v3oXTNDNHsD) | Zahid Hasan (team), AI-generated with Suno | Created by the team with Suno; non-commercial use with credit to Suno |
 
 ## AI tools used
 
-Claude (Anthropic): coding help and Unity MCP. Add any other tools the team used.
+Claude (Anthropic): coding help and Unity MCP. Suno: generated the battle music. Add any other tools the team used.

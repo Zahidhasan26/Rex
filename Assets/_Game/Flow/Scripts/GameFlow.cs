@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Video;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 
 namespace BowGame
 {
@@ -80,7 +82,10 @@ namespace BowGame
                 spawner.useFrontArc = true;
                 spawner.frontDirection = YawDir(config.frontYaw);
             }
-            yield return null;   // let the VR rig start tracking
+            // let the headset start tracking before placing the player (placing too early can leave the rig stuck)
+            float waitUntil = Time.time + 3f;
+            yield return null;
+            while (Time.time < waitUntil && origin != null && origin.Camera.transform.localPosition.y < 0.3f) yield return null;
             TeleportToRing();
             SetRingVisible(true);
             flow = StartCoroutine(RunRound(true));
@@ -97,15 +102,21 @@ namespace BowGame
 
             if (tutorial)
             {
-                Say("Hold the bow in your LEFT hand.\nRIGHT trigger: grab the string,\npull your hand back, let go to shoot.");
+                const string controls = "Hold the bow in your LEFT hand.\nRIGHT trigger: grab the string,\npull your hand back, let go to shoot.";
+                Say(controls);
                 yield return WaitOrSkip(config.controlsSeconds);
+                if (PlayerHud.Instance != null) PlayerHud.Instance.Pin(controls);   // stays above the next instructions, smaller
 
                 if (EmgInput.HardwareConnected && !skipRequested)
                 {
+                    var emg = EmgReceiver.Instance;
                     Say("Calibration: relax your arm");
+                    if (emg != null) emg.StartRelaxCalibration();
                     yield return WaitOrSkip(config.relaxSeconds);
                     Say("Now flex hard!");
+                    if (emg != null) emg.StartFlexCalibration();
                     yield return WaitOrSkip(config.flexSeconds);
+                    if (emg != null) emg.EndCalibration();
                     Say("Calibrated");
                     yield return WaitOrSkip(1.2f);
                 }
@@ -125,6 +136,9 @@ namespace BowGame
                 }
 
                 clampToArena = true;
+                TeleportToRing();   // same placement the skip path uses, so walking starts from a clean state
+                var mover = FindAnyObjectByType<JoystickMove>();
+                if (mover != null) mover.EnableProvider();
                 if (!skipRequested)
                     yield return WalkPractice("Push the LEFT JOYSTICK forward to walk", +1f, config.walkForwardSeconds);
                 if (!skipRequested)
@@ -151,6 +165,7 @@ namespace BowGame
             }
             SetRingVisible(false);
 
+            if (PlayerHud.Instance != null) PlayerHud.Instance.Unpin();
             SetState(GameState.Countdown);
             Say("Get ready");
             float t = config.countdownSeconds;
@@ -164,10 +179,23 @@ namespace BowGame
             GameRefs.StateTimeLeft = 0f;
 
             SetState(GameState.ActOneComplete);
-            FadeTo(calm);
             clampToArena = false;
-            // ---- PART 2 HOOK: the meteor cutscene video plays here (ARCHITECTURE.md section 5b). ----
-            Say("You survived!\nPress A to play again");
+            if (config.cutscene != null)
+            {
+                FadeTo(null);   // music out, the video has its own sound
+                Say("You survived!");
+                yield return new WaitForSeconds(2f);
+                if (spawner != null) spawner.ClearAll();
+                yield return PlayCutscene();
+                // ---- PART 2 HOOK: load the boss fight here (ARCHITECTURE.md section 5b). ----
+                FadeTo(calm);
+                Say("To be continued...\nPress A to play again");
+            }
+            else
+            {
+                FadeTo(calm);
+                Say("You survived!\nPress A to play again");
+            }
             yield return WaitForRestart();
             Restart();
         }
@@ -197,6 +225,7 @@ namespace BowGame
 
         void Restart()
         {
+            if (PlayerHud.Instance != null) PlayerHud.Instance.Unpin();
             if (flow != null) StopCoroutine(flow);
             if (spawner != null) spawner.ClearAll();
             ClearTargets();
@@ -204,6 +233,95 @@ namespace BowGame
         }
 
         void OnBowFired() { shots++; }
+
+        // ---------------------------------------------------------------- cutscene
+
+        // Plays config.cutscene on a big screen in front of the player. Everything else goes dark,
+        // walking is paused, and A (or R / Space) skips it.
+        IEnumerator PlayCutscene()
+        {
+            if (origin == null) yield break;
+            var cam = origin.Camera;
+            var clip = config.cutscene;
+
+            // screen, a few metres in front of where the player is looking, at eye height
+            Vector3 head = cam.transform.position;
+            Vector3 f = cam.transform.forward; f.y = 0f;
+            if (f.sqrMagnitude < 0.01f) f = YawDir(config.frontYaw);
+            f.Normalize();
+            float aspect = clip.height > 0 ? (float)clip.width / clip.height : 16f / 9f;
+            var screen = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            screen.name = "CutsceneScreen";
+            Destroy(screen.GetComponent<Collider>());
+            int uiLayer = LayerMask.NameToLayer("UI");
+            if (uiLayer < 0) uiLayer = 5;
+            screen.layer = uiLayer;
+            screen.transform.position = head + f * config.cutsceneDistance;
+            screen.transform.rotation = Quaternion.LookRotation(f, Vector3.up);
+            screen.transform.localScale = new Vector3(config.cutsceneWidth, config.cutsceneWidth / aspect, 1f);
+
+            var rt = new RenderTexture((int)clip.width > 0 ? (int)clip.width : 1920, (int)clip.height > 0 ? (int)clip.height : 1080, 0);
+            var mat = ringMaterial != null ? new Material(ringMaterial) : new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            mat.color = Color.white;
+            mat.mainTexture = rt;
+            screen.GetComponent<Renderer>().sharedMaterial = mat;
+
+            var voice = screen.AddComponent<AudioSource>();
+            voice.spatialBlend = 0f;
+            voice.playOnAwake = false;
+            voice.volume = config.cutsceneVolume;
+            var vp = screen.AddComponent<VideoPlayer>();
+            vp.playOnAwake = false;
+            vp.isLooping = false;
+            vp.clip = clip;
+            vp.renderMode = VideoRenderMode.RenderTexture;
+            vp.targetTexture = rt;
+            vp.audioOutputMode = VideoAudioOutputMode.AudioSource;
+            vp.EnableAudioTrack(0, true);
+            vp.SetTargetAudioSource(0, voice);
+
+            // darken the world: the camera only draws the screen
+            int oldMask = cam.cullingMask;
+            var oldClear = cam.clearFlags;
+            var oldBg = cam.backgroundColor;
+            bool oldFog = RenderSettings.fog;
+            cam.cullingMask = 1 << uiLayer;
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = Color.black;
+            RenderSettings.fog = false;
+
+            // pause walking
+            var mover = FindAnyObjectByType<JoystickMove>();
+            var provider = origin.GetComponentInChildren<ContinuousMoveProvider>();
+            if (mover != null) mover.enabled = false;
+            if (provider != null) provider.enabled = false;
+
+            vp.Prepare();
+            float giveUp = Time.time + 10f;
+            while (!vp.isPrepared && Time.time < giveUp) yield return null;
+            bool finished = false;
+            vp.loopPointReached += _ => finished = true;
+            vp.Play();
+            float canSkipAt = Time.time + 1f;
+            float maxEnd = Time.time + (float)clip.length + 5f;   // safety net if the end event never comes
+            while (!finished && Time.time < maxEnd)
+            {
+                if (Time.time > canSkipAt && restartAction.WasPressedThisFrame()) break;
+                yield return null;
+            }
+
+            vp.Stop();
+            cam.cullingMask = oldMask;
+            cam.clearFlags = oldClear;
+            cam.backgroundColor = oldBg;
+            RenderSettings.fog = oldFog;
+            if (mover != null) mover.enabled = true;
+            if (provider != null) provider.enabled = true;
+            Destroy(screen);
+            Destroy(mat);
+            rt.Release(); Destroy(rt);
+            yield return new WaitForSeconds(0.5f);   // so the skip press doesn't also restart the game
+        }
 
         void OnDinoFragile(Dinosaur d)
         {
@@ -451,7 +569,7 @@ namespace BowGame
         void FadeTo(AudioSource target)
         {
             StartCoroutine(Fade(calm, target == calm ? config.musicVolume : 0f));
-            StartCoroutine(Fade(battle, target == battle ? config.musicVolume : 0f));
+            StartCoroutine(Fade(battle, target == battle ? config.battleVolume : 0f));
         }
 
         IEnumerator Fade(AudioSource src, float to)

@@ -30,6 +30,11 @@ MonoBehaviour:
   targetDistance: 14
   targetSpacing: 4
   calmMusic: {fileID: 8300000, guid: 3be4e1193f0d40f19192aaf332bf7e51, type: 3}
-  battleMusic: {fileID: 0}
+  battleMusic: {fileID: 8300000, guid: 76d72c36299ad3447ae5bb39cb5338cb, type: 3}
   musicVolume: 0.5
+  battleVolume: 0.35
   musicFade: 2
+  cutscene: {fileID: 32900000, guid: effee8f305320e74997bbc76028893ad, type: 3}
+  cutsceneDistance: 5
+  cutsceneWidth: 4.5
+  cutsceneVolume: 1

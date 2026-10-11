@@ -15,11 +15,19 @@ namespace BowGame
         public Transform flashQuad;
         public float barWidth = 0.12f;
 
+        [Header("Centre message")]
+        [Tooltip("How far in front of the eyes the message floats (metres). It is scaled up with distance so it reads the same size.")]
+        public float messageDistance = 2.0f;
+        [Tooltip("Size of the pinned text (the earlier instruction kept above the new one), relative to the main message.")]
+        public float pinnedSize = 0.65f;
+
         public static PlayerHud Instance;
 
         float flash;
         Color flashColor = new Color(1f, 0f, 0f, 0f);
         float messageUntil = -1f;
+        TMP_Text pinnedText;
+        bool layoutDone;
 
         void OnEnable()
         {
@@ -28,6 +36,8 @@ namespace BowGame
             GameEvents.StateChanged += OnState;
             GameEvents.PlayerDied += OnDied;
             if (messageText != null) messageText.text = "";
+            LayoutMessages();
+            if (pinnedText != null) pinnedText.text = "";
             SetFlash(0f);
         }
 
@@ -62,7 +72,48 @@ namespace BowGame
             }
         }
 
-        void OnDied() { Show("You died", 3f); }
+        void OnDied() { Show("You died", 3f); Unpin(); }
+
+        // Pushes the message further out and builds the smaller "pinned" text that sits above it.
+        void LayoutMessages()
+        {
+            if (layoutDone || messageText == null) return;
+            layoutDone = true;
+            var t = messageText.transform;
+            float oldZ = Mathf.Max(0.1f, t.localPosition.z);
+            float k = messageDistance / oldZ;
+            var p = t.localPosition;
+            t.localPosition = new Vector3(p.x * k, p.y * k, messageDistance);
+            t.localScale = t.localScale * k;
+
+            pinnedText = Instantiate(messageText, t.parent);
+            pinnedText.name = "PinnedMessage";
+            pinnedText.text = "";
+            pinnedText.fontSize = messageText.fontSize * pinnedSize;
+            pinnedText.color = new Color(1f, 1f, 1f, 0.8f);
+            pinnedText.verticalAlignment = VerticalAlignmentOptions.Bottom;
+            var rt = pinnedText.rectTransform;
+            var mainRt = messageText.rectTransform;
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.sizeDelta = new Vector2(mainRt.sizeDelta.x, mainRt.sizeDelta.y * 1.2f);
+            // bottom edge of the pinned text sits just above the top edge of the main message box
+            float mainTop = (mainRt.sizeDelta.y * (1f - mainRt.pivot.y) + 0.03f) * t.localScale.y;
+            rt.localPosition = t.localPosition + new Vector3(0f, mainTop, 0f);
+            rt.localRotation = t.localRotation;
+            rt.localScale = t.localScale;
+        }
+
+        // Keeps an earlier instruction on screen, smaller, above whatever message comes next.
+        public void Pin(string text)
+        {
+            LayoutMessages();
+            if (pinnedText != null) pinnedText.text = text;
+        }
+
+        public void Unpin()
+        {
+            if (pinnedText != null) pinnedText.text = "";
+        }
 
         public void Show(string text, float seconds)
         {

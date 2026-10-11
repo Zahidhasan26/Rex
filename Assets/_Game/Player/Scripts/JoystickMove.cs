@@ -22,7 +22,17 @@ namespace BowGame
         InputAction stick;
         Vector3 lastPos;
         float stuckTime, fallY;
-        bool providerWorks, fallback;
+        bool fallback;
+
+        void Awake()
+        {
+            // Keep controller input alive even when the Unity window / Game view doesn't have focus
+            // (for example after clicking another window while wearing the headset).
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
+            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
+        }
 
         void OnEnable()
         {
@@ -39,18 +49,24 @@ namespace BowGame
             origin = FindAnyObjectByType<XROrigin>();
             if (origin == null) { enabled = false; return; }
             cc = origin.GetComponent<CharacterController>();
+            EnableProvider();
+            if (provider != null && provider.moveSpeed > 0.1f) fallbackSpeed = provider.moveSpeed;
+            lastPos = origin.transform.position;
+        }
 
+        // Smooth walking on the left stick, move provider switched on. Safe to call again at any time.
+        public void EnableProvider()
+        {
             foreach (var m in FindObjectsByType<ControllerInputActionManager>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 if (m.name.Contains("Left")) m.smoothMotionEnabled = true;
-
+            if (origin == null) return;
             provider = origin.GetComponentInChildren<ContinuousMoveProvider>(true);
             if (provider != null)
             {
                 if (!provider.gameObject.activeSelf) provider.gameObject.SetActive(true);
                 provider.enabled = true;
-                if (provider.moveSpeed > 0.1f) fallbackSpeed = provider.moveSpeed;
             }
-            lastPos = origin.transform.position;
+            if (cc != null && !cc.enabled) cc.enabled = true;
         }
 
         void LateUpdate()
@@ -60,29 +76,39 @@ namespace BowGame
             bool pushed = s.magnitude > deadZone;
             float dt = Time.deltaTime;
 
+            // How far something other than this script moved the rig since last frame.
             Vector3 delta = origin.transform.position - lastPos; delta.y = 0f;
-            if (!fallback && !providerWorks)
+            if (pushed && delta.magnitude < 1f)   // a bigger jump is a teleport, not walking
             {
-                if (pushed && delta.magnitude < 1f)   // a bigger jump is a teleport, not walking
+                if (delta.magnitude > 0.002f)
                 {
-                    if (delta.magnitude > 0.002f) providerWorks = true;
-                    else if ((stuckTime += dt) > 0.5f)
-                    {
-                        fallback = true;
-                        Debug.Log("JoystickMove: the move provider isn't moving the rig, using the backup mover.");
-                    }
+                    if (fallback) Debug.Log("JoystickMove: normal walking works again, backup mover off.");
+                    fallback = false; stuckTime = 0f;
                 }
-                else stuckTime = 0f;
+                else if (!fallback && (stuckTime += dt) > 0.5f)
+                {
+                    fallback = true;
+                    Debug.Log("JoystickMove: stick pushed but the rig isn't moving, using the backup mover. " +
+                              "provider=" + (provider != null ? (provider.isActiveAndEnabled ? "on" : "off") : "missing") +
+                              ", characterController=" + (cc != null ? (cc.enabled ? "on" : "off") : "missing") +
+                              ", state=" + GameRefs.State);
+                    EnableProvider();
+                }
             }
+            else stuckTime = 0f;
 
-            if (fallback && cc != null && cc.enabled)
+            if (fallback && pushed)
             {
                 var cam = origin.Camera.transform;
                 Vector3 f = cam.forward; f.y = 0f; f.Normalize();
                 Vector3 r = cam.right; r.y = 0f; r.Normalize();
-                Vector3 move = pushed ? (f * s.y + r * s.x) * fallbackSpeed : Vector3.zero;
-                fallY = cc.isGrounded ? -1f : fallY - 9.81f * dt;
-                cc.Move((move + Vector3.up * fallY) * dt);
+                Vector3 move = (f * s.y + r * s.x) * fallbackSpeed * dt;
+                if (cc != null && cc.enabled)
+                {
+                    fallY = cc.isGrounded ? -1f : fallY - 9.81f * dt;
+                    cc.Move(move + Vector3.up * fallY * dt);
+                }
+                else origin.transform.position += move;
             }
             lastPos = origin.transform.position;
         }
