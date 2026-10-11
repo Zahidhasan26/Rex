@@ -6,6 +6,13 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (face photos folder)
+
+- **`Boss/FacePhotos/`**: drop the presenter's photo here.
+  - `Editor/FacePhotoImporter.cs` imports anything in this folder ready for `BossFace` (readable, uncompressed, no mipmaps).
+  - A `.gitignore` inside keeps the photos on this computer only, so they are never pushed to GitHub. Only `README.txt` (how to take and frame the photo) is in git.
+- Tested in edit mode and Play mode with a drawn cartoon head (no real photo): the face fills the front, the back of the head and the neck match the sampled hair and skin colours, and the boss fight runs normally. No errors.
+
 ## 2026-10-11 (boss fight in VR)
 
 - **`Boss/BossTest.unity` now runs in VR.** Zahid's `Player` prefab (the VR rig with the bow) stands at the origin, and the boss starts 18 m in front. The old flat-screen setup (camera and `DummyPlayer`) is kept but switched off under "Desktop Test (off - tick to use without headset)".

@@ -6,6 +6,21 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (boss face: whole head, photo added before the presentation)
+
+### Changed
+- **The face now covers the whole front of the head, with nothing drawn over it.** The slicked-back hair cap is gone from `Boss.fbx`. The head is now split cleanly into three parts:
+  - `Boss_Face`: the entire front. The picture is projected straight on: left/right edges at the ears, bottom at the chin, top at the crown.
+  - `Boss_Hair`: the back of the head above the ears, tinted with a hair colour sampled from the top of the picture.
+  - `Boss_Skin`: the nape and neck, tinted with a skin colour sampled from the cheeks.
+  - The picture's edges fade into those colours, so there's no seam.
+- **`BossFace.cs` rewritten:**
+  - New **`presetPhoto`** (a photo added to the project before the presentation), with `photoCrop` and `mirror` to frame it.
+  - Priority: live scan (if one was taken), then the preset photo, then the porcelain mask (which now also has a painted hairline).
+  - Uses MaterialPropertyBlocks and runs in edit mode, so the face shows in the Scene view as soon as the photo is assigned and updates while the crop is adjusted.
+- **`FaceScanStation`**: the guide now asks for the whole head (chin to top of hair) and is a little narrower, with the eye line at 45% from the top, to match the new mapping.
+- **DinoTest:** the boss is in the scene from the start. The live webcam booth is switched off ("FaceScanStation (off - live webcam scan, tick to use)").
+
 ## 2026-10-11 (DinoTest: face scan + boss, third person again)
 
 ### Changed

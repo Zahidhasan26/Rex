@@ -1,0 +1,5 @@
+# Keep face photos on this computer only.
+*
+!.gitignore
+!README.txt
+!README.txt.meta

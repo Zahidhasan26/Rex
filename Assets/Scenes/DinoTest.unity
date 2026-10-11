@@ -705,7 +705,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5334724550333912844, guid: 6a751b3b5e98d114b93af5341c1ec1bb, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -776,13 +776,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3830128887176749133, guid: 19f68a673edd34f43b9c5e91cefc5608, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 1760393140118906905, guid: 19f68a673edd34f43b9c5e91cefc5608, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 19f68a673edd34f43b9c5e91cefc5608, type: 3}
 --- !u!1 &1344368430
 GameObject:
@@ -960,12 +954,12 @@ GameObject:
   - component: {fileID: 1940690817}
   - component: {fileID: 1940690816}
   m_Layer: 0
-  m_Name: FaceScanStation (boss appears after the scan)
+  m_Name: FaceScanStation (off - live webcam scan, tick to use)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1940690816
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -25,9 +25,9 @@ namespace BowGame
         [Header("Guide (fractions of the camera image height)")]
         [Range(0.3f, 0.95f)] public float guideHeight = 0.72f;
         [Tooltip("Oval width divided by height.")]
-        [Range(0.5f, 1f)] public float guideAspect = 0.78f;
+        [Range(0.5f, 1f)] public float guideAspect = 0.72f;
         [Tooltip("Where the eye line sits, from the top of the oval (0..1).")]
-        [Range(0.2f, 0.6f)] public float eyeLine = 0.42f;
+        [Range(0.2f, 0.6f)] public float eyeLine = 0.45f;
         public int outputWidth = 384;
         public int outputHeight = 480;
         public float countdownSeconds = 3f;
@@ -263,7 +263,7 @@ namespace BowGame
                     GUI.DrawTexture(view, Overlay());
                     string top = CurrentStep == Step.Countdown
                         ? Mathf.CeilToInt(countdownEnd - Time.unscaledTime).ToString()
-                        : "Fit your face inside the oval, eyes on the line. Look straight ahead.";
+                        : "Fit your whole head in the oval (chin to top of hair), eyes on the line. Look straight ahead.";
                     GUI.Label(new Rect(0, H * 0.02f, W, H * 0.08f), top, big);
                     GUI.Label(new Rect(0, H * 0.9f, W, H * 0.08f), "Space = take photo (3 s countdown)      N = skip", small);
                     break;
