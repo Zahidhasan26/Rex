@@ -45,6 +45,9 @@ namespace BowGame
         public AudioSource audioSource;
         public AudioClip drawClip;
         public AudioClip releaseClip;
+        [Tooltip("Arrow whoosh played on release, louder for a stronger shot.")]
+        public AudioClip flightClip;
+        [Range(0f, 1f)] public float flightVolume = 0.7f;
 
         InputAction rightTrigger;
         InputAction rightPosition;
@@ -150,6 +153,7 @@ namespace BowGame
             Debug.Log("[Bow] fired, draw " + strength.ToString("0.00"));
 
             if (audioSource != null && releaseClip != null) audioSource.PlayOneShot(releaseClip);
+            if (audioSource != null && flightClip != null) audioSource.PlayOneShot(flightClip, flightVolume * Mathf.Lerp(0.5f, 1f, strength));
             var device = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
             if (device.isValid) device.SendHapticImpulse(0u, Mathf.Lerp(0.3f, 1f, strength), 0.09f);
         }

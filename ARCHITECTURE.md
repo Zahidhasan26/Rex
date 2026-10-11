@@ -16,7 +16,7 @@ We finish **Act 1** completely before anything else is started.
 |---|---|
 | Calibrate, countdown, survive against dinosaurs, win or die | Meteor cutscene |
 | Bow with EMG draw, player movement, player health | Boss and uploaded face |
-| Two dinosaur types: spawn, move, attack, die | Crowd engagement |
+| Two dinosaur types (Maip, Gorgosaurus): spawn, move, attack, die | Crowd engagement |
 | Vest hit feedback | |
 | HUD, sounds, regular and fast modes | |
 
@@ -80,8 +80,8 @@ Read from the project (VR template) on Oct 10. If this table and the two files e
 | Person | Owns | Folder they may edit | Test scene |
 |---|---|---|---|
 | **Zahid** | Project setup, shared Core code, player rig, bow, arrows, movement, player health, EMG and vest scripts in Unity, HUD | `Assets/_Game/Core`, `Assets/_Game/Player`, `Assets/_Game/UI` | `PlayerTest` |
-| **Halar and Zach** (shared) | The dinosaurs: importing both models, animation, hit zones, health, movement, attacks, death. The world and the round: `Main` scene after handover, terrain arena, NavMesh, spawner, difficulty ramp, game flow and timers, modes | `Assets/_Game/Dinosaurs`, `Assets/_Game/World`, `Assets/_Game/Flow` | `DinoTest`, `Main` (owners) |
-| **Saber** | EMG armband and haptic vest hardware and firmware. After hardware is done: sounds, credits, demo video, submission | `Hardware/` (repo root, outside Unity), later `Assets/_Game/Audio` | none |
+| **Halar and Zach** (shared) | The dinosaurs: importing the models, animation, hit zones, health, movement, attacks, death. The world and the round: `Main` scene after handover, terrain arena, NavMesh, spawner, difficulty ramp, game flow and timers, modes | `Assets/_Game/Dinosaurs`, `Assets/_Game/World`, `Assets/_Game/Flow` | `DinoTest`, `Main` (owners) |
+| **Saber** | EMG armband and haptic vest hardware and firmware. After hardware is done: credits, demo video, submission | `Hardware/` (repo root, outside Unity) | none |
 
 **The one rule that prevents lost work:** you only edit files inside your own folders. If you need a change in someone else's folder, ask that person.
 
@@ -112,12 +112,15 @@ They split these between themselves and say in the team chat who has which. A se
 
 **Dinosaurs**
 
-1. Import both models into `Assets/_Game/Dinosaurs/Models`. **First check each one has animations** (walk or run, attack, death). If a model is rigged but has no animations, stop and tell the team before building on it.
+1. Import each model into `Assets/_Game/Dinosaurs/Models`. **First check each one has animations** (walk or run, attack, death). If a model is rigged but has no animations, stop and tell the team before building on it.
 2. Convert materials to URP if they show pink. Fix scale so the dinosaurs are the right size next to the player.
 3. One prefab per dinosaur, each with: `NavMeshAgent`, Animator, a script implementing `IDamageable`, and three hitbox colliders (head, body, legs), each with a `HitZoneMarker`, on the `Dinosaur` layer.
 4. Behaviour: move toward `GameRefs.PlayerHead`, attack in range, play death animation, then remove the body after a few seconds.
 5. Damage rules: head = instant kill, body = 3 hits, legs = slowed.
-6. Suggested roles (team can change): **Maip** is the fast melee attacker; **Gorgosaurus** is slower, tougher, and spits a visible projectile from range.
+6. Roles:
+   - **Maip:** fast melee attacker (bite, hit-and-retreat).
+   - **Gorgosaurus:** slower, tougher. Bites up close, and from range sprays **spit**: a brownish, natural-looking spray of saliva with its own attack animation (Zach, replacing the old glowing glob). Its roars stay as they are.
+   - **Death sounds must be different from the roars.** Right now a dinosaur's death cry is one of the roar clips (`dino_roar_A_02`), so a kill sounds like an attack. Use a separate death sound (see `SOUNDS.md`).
 7. Attacks call `GameEvents.RaisePlayerHit(damage, attackerPosition)`. Never touch the player's scripts directly.
 8. On death, call `GameEvents.RaiseDinoDied(gameObject)`.
 9. Test in `DinoTest` using a `DummyPlayer` object that sets `GameRefs.PlayerHead`, so no headset is needed.
@@ -138,7 +141,7 @@ They split these between themselves and say in the team chat who has which. A se
 2. Keep firmware in `Hardware/emg_armband` and `Hardware/haptic_vest` in the repo.
 3. Follow the network contract in section 6 exactly.
 4. Test each device against a laptop on the hotspot before handing to Zahid.
-5. Afterward: sound effects (bow, roars, hits, win, death), `CREDITS.md`, demo video, submission page.
+5. Afterward: `CREDITS.md`, demo video, submission page.
 
 ## 5. Act 1 game flow
 
@@ -224,7 +227,7 @@ Also in Core, written by Zahid:
 | `Player` | Player body collider |
 | `Dinosaur` | Dinosaur hitboxes |
 | `Arrow` | Arrows |
-| `EnemyProjectile` | Spit projectiles |
+| `EnemyProjectile` | Gorgosaurus spit |
 | `Ground` | Terrain |
 
 **Network contract** (Saber and Zahid):
@@ -247,7 +250,7 @@ Assets/
     Dinosaurs/   models, prefabs, AI         (Halar and Zach)
     World/       terrain edits, spawner      (Halar and Zach)
     Flow/        GameFlow, GameConfig        (Halar and Zach)
-    Audio/       sounds                      (Saber)
+    Audio/       not used (sounds live in Dinosaurs/Audio)
   Scenes/        Main, Main_Daylight (backup of the midday look), PlayerTest, DinoTest, CombatTest, DinoShowcase (test scenes)
   TerrainDemoScene_URP/   terrain pack, stored in Git LFS; avoid editing its files, copy what you need into your own folder
 Hardware/        ESP32 firmware              (Saber)
@@ -257,7 +260,7 @@ CREDITS.md
 
 Inside each folder use `Scripts/`, `Prefabs/`, `Models/`, `Materials/` as needed.
 
-**Audio:** sounds are currently staged in `Assets/_Game/Dinosaurs/Audio` (checklist in `SOUNDS.md`; `Bow/shoot.ogg` is already there). `Assets/_Game/Audio` is still empty. Before Saber starts the audio pass, agree which folder holds the final sounds. Move files only inside the Unity Editor so the `.meta` links survive.
+**Audio:** all sounds live in `Assets/_Game/Dinosaurs/Audio` (checklist in `SOUNDS.md`). Zach makes the dinosaur, world and arrow-impact sounds; Zahid wires the player and bow sounds. `Assets/_Game/Audio` is not used. Move files only inside the Unity Editor so the `.meta` links survive.
 
 ## 8. Rules for AI tools
 
@@ -327,7 +330,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 | 0 | Pre-handover checklist | Zahid |
 | 1 | Each lane works alone with stand-ins: bow fires in `PlayerTest`; one dinosaur walks, attacks and dies in `DinoTest`; spawner and timer run in `Main` with placeholder cubes | Zahid, Halar, Zach |
 | 2 | First merge: `Player` prefab and one dinosaur prefab placed in `Main`; arrows kill dinosaurs; dinosaurs hurt the player | Halar or Zach places (whoever holds the lock), all test |
-| 3 | Second dinosaur, ranged attack, difficulty ramp, HUD | Halar, Zach, Zahid |
+| 3 | Gorgosaurus spit restyle (brown saliva spray, new animation), separate death sounds, difficulty ramp, HUD | Halar, Zach, Zahid |
 | 4 | Real EMG and vest connected | Saber, Zahid |
 | 5 | Fast mode played start to finish by someone outside the team; fix what confuses them | All |
 | 6 | Act 1 frozen. Only then start the final act | All |
@@ -335,7 +338,7 @@ Do all of this in the first commits, before Halar and Zach start, because these 
 ## 11. Things to watch
 
 - **Dinosaur animations.** The Maip model only had an idle and the Gorgosaurus only a run, so attack, hit, death and the Maip's walk are done in code by rotating bones from a `ProceduralDinoAnim` script (Halar). It is merged into `main`. Re-check the animations after any change to a dinosaur model or prefab.
-- **Model origin and credit.** The Gorgosaurus is listed as CC BY 4.0, which requires credit, and its page says it comes from a commercial *Walking with Dinosaurs* game. Put both models' authors and links in `CREDITS.md`, and check the event rules on third-party assets.
+- **Model origin and credit.** The Gorgosaurus is listed as CC BY 4.0, which requires credit, and its page says it comes from a commercial *Walking with Dinosaurs* game. Put every model's author and link in `CREDITS.md`, and check the event rules on third-party assets.
 - **Windows firewall.** The first time the game listens on the network, Windows asks for permission: allow Unity on private networks, and set the hotspot as a Private network. Otherwise EMG data silently never arrives.
 - **EMG arm and controller.** The right arm wears the sensor, so keep the right hand's buttons unused. Gripping a controller tenses the forearm and can fire arrows by accident.
 - **Comfort.** Smooth thumbstick movement makes some first-time players queasy. Keep speed low and offer snap turn.

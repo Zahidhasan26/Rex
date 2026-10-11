@@ -19,6 +19,10 @@ namespace BowGame
     {
         public const string ResourceName = "Mount_Gorgosaurus";
 
+        // Master switch for the whole ride feature, in every scene. Off = the mount never spawns,
+        // whatever the prefab says. Set to true to bring the ride back.
+        public static bool FeatureEnabled = false;
+
         [Header("On / off")]
         public bool rideEnabled = true;
 
@@ -73,6 +77,7 @@ namespace BowGame
 
         static void AutoSpawn()
         {
+            if (!FeatureEnabled) return;
             if (FindFirstObjectByType<RideMount>() != null) return;
 
             var origin = FindFirstObjectByType<XROrigin>();

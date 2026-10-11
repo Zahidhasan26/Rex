@@ -23,7 +23,7 @@ Same set in each folder. The Maip should sound light and fast, the Gorgosaurus h
 - [ ] ★ `<name>_bite.wav`: jaw snap
 - [ ] `<name>_hurt.wav`: hit in the body
 - [ ] `<name>_hurt_leg.wav`: hit in the leg (limping yelp)
-- [ ] ★ `<name>_death.wav`: death cry
+- [ ] ★ `<name>_death.wav`: death cry. **Must sound clearly different from the roars** (today the death cry reuses `dino_roar_A_02`, so a kill sounds like an attack).
 - [ ] `<name>_collapse.wav`: body hitting the ground
 
 (`<name>` = `maip` or `gorgosaurus`)
