@@ -13,6 +13,8 @@ namespace BowGame
         [Header("Health")]
         [Tooltip("Body hits needed to kill. Head hits always kill instantly.")]
         public int bodyHitsToKill = 3;
+        [Tooltip("Head hits needed to kill. 1 = any headshot kills. A head hit counts as bodyHitsToKill / headHitsToKill body hits.")]
+        public int headHitsToKill = 1;
 
         [Header("Leg hits slow the dinosaur")]
         [Range(0.05f, 1f)] public float legSlowMultiplier = 0.4f;
@@ -64,6 +66,24 @@ namespace BowGame
         [Tooltip("Player must still be within attackRange times this when the bite lands, or it misses.")]
         public float biteReachMultiplier = 1.2f;
 
+        [Header("Bite feel")]
+        [Tooltip("The dinosaur's head bone. If set, the head is kept at least faceGap metres from the player so it never passes through them.")]
+        public Transform mouth;
+        public float faceGap = 0.45f;
+        [Tooltip("Hold the bite for a moment if the player is looking away, so they see it coming.")]
+        public bool waitForPlayerLook = false;
+        [Range(10f, 90f)] public float lookAngle = 55f;
+        [Tooltip("Longest it will wait for the player to look. After this it bites anyway.")]
+        public float maxLookWait = 1.5f;
+
+        [Header("Hit and retreat (alpha)")]
+        [Tooltip("After each bite, back away slowly while facing the player, wind up, then charge again.")]
+        public bool retreatAfterAttack = false;
+        public float retreatDistance = 9f;
+        public float retreatSpeed = 1.6f;
+        [Tooltip("Seconds it stands and glares before charging again.")]
+        public Vector2 windUpTime = new Vector2(1.0f, 2.0f);
+
         [Header("Death")]
         [Tooltip("Seconds the body stays before it is removed.")]
         public float corpseTime = 4f;
@@ -83,7 +103,10 @@ namespace BowGame
         protected bool isAttacking;
         protected float nextAttackTime;
 
-        int bodyHits;
+        float damageTaken;
+        bool retreating;
+        float retreatUntil;
+        float lookWaitStart = -1f;
         float slowUntil;
         float nextRepath;
         float pausedUntil;
@@ -93,14 +116,15 @@ namespace BowGame
 
         public bool IsDead => isDead;
 
-        // Events for other components on the dinosaur (sound, effects). Nothing outside the dinosaur uses these.
-        public event System.Action Spawned;
-        public event System.Action Paused;
-        public event System.Action ChargeStarted;
-        public event System.Action AttackStarted;
-        public event System.Action<HitZone, Vector3> Hit;
-        public event System.Action Died;
-        public event System.Action Collapsed;
+        // Read-only hooks for visuals (ProceduralDinoAnim). They do not change behaviour.
+        public bool IsAttacking => isAttacking;
+        public event System.Action AttackStarted;        // an attack has just begun
+        public event System.Action<HitZone> WasHit;      // a hit that did not kill
+        public event System.Action Died;                 // the dinosaur has just died
+        // Sound hooks (DinoAudio). They do not change behaviour.
+        public event System.Action Paused;                         // stopped to sniff / look around
+        public event System.Action ChargeStarted;                  // entered charge distance
+        public event System.Action<HitZone, Vector3> Hit;          // any arrow hit, including the killing one, with the hit point
 
         bool charging;
 
@@ -119,7 +143,6 @@ namespace BowGame
         protected virtual void Start()
         {
             agent.speed = moveSpeed * personalSpeed;
-            Spawned?.Invoke();
         }
 
         protected virtual void Update()
@@ -145,14 +168,24 @@ namespace BowGame
                 return;
             }
 
+            KeepOutOfPlayersFace(player, dist);
+
+            if (retreating)
+            {
+                UpdateRetreat(player, dist);
+                return;
+            }
+
             if (dist <= attackRange && CanAttack(player))
             {
                 agent.isStopped = true;
                 agent.velocity = Vector3.zero;   // plant its feet instead of sliding through the player
                 FaceTowards(player.position);
-                if (Time.time >= nextAttackTime)
+                if (Time.time >= nextAttackTime && PlayerIsWatching(player))
                 {
+                    lookWaitStart = -1f;
                     nextAttackTime = Time.time + attackCooldown * Random.Range(0.85f, 1.2f);
+                    AttackStarted?.Invoke();
                     StartCoroutine(AttackRoutine(player));
                 }
                 return;
@@ -184,6 +217,66 @@ namespace BowGame
             {
                 nextRepath = Time.time + Random.Range(repathInterval.x, repathInterval.y);
                 agent.SetDestination(PickMoveTarget(player.position, dist, wander01));
+            }
+        }
+
+        // True when the bite may start: either we don't care, the player is looking this way, or we've waited long enough.
+        bool PlayerIsWatching(Transform player)
+        {
+            if (!waitForPlayerLook) return true;
+            Vector3 target = (mouth != null ? mouth.position : transform.position + Vector3.up * 1.5f) - player.position;
+            if (Vector3.Angle(player.forward, target) <= lookAngle) return true;
+            if (lookWaitStart < 0f) lookWaitStart = Time.time;
+            return Time.time - lookWaitStart >= maxLookWait;
+        }
+
+        // Stops the head from passing through the player: if the mouth gets closer than faceGap, slide the body back.
+        void KeepOutOfPlayersFace(Transform player, float dist)
+        {
+            if (mouth == null) return;
+            Vector3 away = transform.position - player.position;
+            away.y = 0f;
+            if (away.sqrMagnitude < 0.0001f) away = -player.forward;
+            away.Normalize();
+            float mouthDist = FlatDistance(mouth.position, player.position);
+            // Only counts when the mouth is on the player's side of the body (it normally is).
+            float overlap = faceGap - mouthDist;
+            if (FlatDistance(mouth.position, transform.position) > dist) overlap = faceGap + mouthDist;
+            if (overlap > 0f) agent.Move(away * Mathf.Min(overlap, 4f * Time.deltaTime));
+        }
+
+        void BeginRetreat()
+        {
+            retreating = true;
+            retreatUntil = Time.time + retreatDistance / Mathf.Max(0.1f, retreatSpeed) + 2f;
+            agent.updateRotation = false;   // walk backwards, eyes on the player
+            pausedUntil = 0f;
+        }
+
+        void UpdateRetreat(Transform player, float dist)
+        {
+            FaceTowards(player.position);
+            if (dist >= retreatDistance || Time.time >= retreatUntil)
+            {
+                retreating = false;
+                agent.updateRotation = true;
+                agent.isStopped = true;
+                pausedUntil = Time.time + Random.Range(windUpTime.x, windUpTime.y);   // wind up, then the normal charge takes over
+                return;
+            }
+            Vector3 away = transform.position - player.position;
+            away.y = 0f;
+            Vector3 target = player.position + away.normalized * (retreatDistance + 1f);
+            target.y = transform.position.y;
+            agent.isStopped = false;
+            agent.speed = retreatSpeed;
+            agent.autoBraking = true;
+            agent.stoppingDistance = 0f;
+            if (Time.time >= nextRepath)
+            {
+                nextRepath = Time.time + 0.4f;
+                if (NavMesh.SamplePosition(target, out NavMeshHit hit, 4f, NavMesh.AllAreas)) agent.SetDestination(hit.position);
+                else retreatUntil = 0f;   // nowhere to back into: skip straight to the wind-up
             }
         }
 
@@ -233,7 +326,6 @@ namespace BowGame
         {
             isAttacking = true;
             SetAnimTrigger(attackTrigger);
-            AttackStarted?.Invoke();
 
             yield return new WaitForSeconds(biteDelay);
 
@@ -245,6 +337,7 @@ namespace BowGame
 
             yield return new WaitForSeconds(recoverTime);
             isAttacking = false;
+            if (retreatAfterAttack) BeginRetreat();
         }
 
         // ---------- IDamageable (called by Zahid's arrow) ----------
@@ -258,17 +351,19 @@ namespace BowGame
             switch (zone)
             {
                 case HitZone.Head:
-                    Die();
-                    return;
+                    damageTaken += (float)bodyHitsToKill / Mathf.Max(1, headHitsToKill);
+                    if (damageTaken >= bodyHitsToKill - 0.01f) { Die(); return; }
+                    break;
                 case HitZone.Body:
-                    bodyHits++;
-                    if (bodyHits >= bodyHitsToKill) { Die(); return; }
+                    damageTaken += 1f;
+                    if (damageTaken >= bodyHitsToKill - 0.01f) { Die(); return; }
                     break;
                 case HitZone.Legs:
                     slowUntil = Time.time + legSlowDuration;
                     break;
             }
             SetAnimTrigger(hitTrigger);
+            WasHit?.Invoke(zone);
         }
 
         protected virtual void Die()
@@ -277,20 +372,21 @@ namespace BowGame
             isDead = true;
             StopAllCoroutines();
             isAttacking = false;
+            retreating = false;
 
             if (agent.isOnNavMesh) agent.isStopped = true;
             agent.enabled = false;
             foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
 
+            Died?.Invoke();
             if (HasParam(dieTrigger)) SetAnimTrigger(dieTrigger);
-            else
+            else if (Died == null)   // stand-in when nothing else animates the death
             {
                 if (animator != null) animator.speed = 0f;   // freeze the pose
-                StartCoroutine(FallOver());                  // stand-in without a death animation
+                StartCoroutine(FallOver());
             }
 
             GameEvents.RaiseDinoDied(gameObject);
-            Died?.Invoke();
             Destroy(gameObject, corpseTime);
         }
 
@@ -304,7 +400,6 @@ namespace BowGame
                 yield return null;
             }
             transform.rotation = to;
-            Collapsed?.Invoke();
         }
 
         // ---------- helpers ----------

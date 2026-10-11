@@ -46,11 +46,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.DinoSpawner
   dinosaurs:
   - prefab: {fileID: 740058287092723877, guid: ad65298fa70c9ec4f8ed25ae915864d3, type: 3}
+    weight: 1
+    unlockAfter: 0
+    keepOneAlive: 1
+  - prefab: {fileID: 1548569209778577167, guid: 36c24e7abf826954295699756a070f83, type: 3}
     weight: 3
     unlockAfter: 0
-  - prefab: {fileID: 1548569209778577167, guid: 36c24e7abf826954295699756a070f83, type: 3}
-    weight: 1
-    unlockAfter: 8
+    keepOneAlive: 0
   mode: 0
   startInterval: 6
   endInterval: 1.5

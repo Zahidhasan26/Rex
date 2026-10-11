@@ -19,7 +19,17 @@ namespace BowGame
             public float weight = 1f;
             [Tooltip("Seconds after spawning starts before this type can appear.")]
             public float unlockAfter = 0f;
+            [Tooltip("If none of this type is alive, it is spawned next (guarantees e.g. one biter at all times).")]
+            public bool keepOneAlive = false;
         }
+
+        [Header("Opening (alpha)")]
+        [Tooltip("Optional. This one dinosaur spawns alone, in front of the player. Nothing else spawns until it is dead.")]
+        public Dinosaur openingDino;
+        [Tooltip("How far in front of the player the opening dinosaur appears, in metres.")]
+        public float openingDistance = 32f;
+        [Tooltip("Pause after the opening dinosaur dies before the others start coming.")]
+        public float delayAfterOpening = 3f;
 
         [Header("What to spawn")]
         public List<DinoEntry> dinosaurs = new List<DinoEntry>();
@@ -57,6 +67,8 @@ namespace BowGame
         float elapsed;
         float nextSpawn;
         bool running;
+        Dinosaur opening;
+        bool openingPending;
 
         public int AliveCount { get { Prune(); return alive.Count; } }
 
@@ -101,6 +113,8 @@ namespace BowGame
             running = true;
             elapsed = 0f;
             nextSpawn = firstSpawnDelay;
+            opening = null;
+            openingPending = openingDino != null;
         }
 
         public void Stop() => running = false;
@@ -108,6 +122,22 @@ namespace BowGame
         void Update()
         {
             if (!running || GameRefs.PlayerHead == null) return;
+
+            // Opening: one dinosaur alone. The clock for everything else starts when it dies.
+            if (openingPending)
+            {
+                if (opening == null)
+                {
+                    opening = SpawnOpening();
+                    if (opening == null) openingPending = false;   // no valid spot: don't block the round
+                    return;
+                }
+                if (!opening.IsDead) return;
+                openingPending = false;
+                elapsed = 0f;
+                nextSpawn = delayAfterOpening;
+                return;
+            }
 
             elapsed += Time.deltaTime;
             if (elapsed < nextSpawn) return;
@@ -135,6 +165,30 @@ namespace BowGame
             return d;
         }
 
+        Dinosaur SpawnOpening()
+        {
+            Transform player = GameRefs.PlayerHead;
+            Vector3 forward = player.forward;
+            forward.y = 0f;
+            forward = forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
+
+            // Straight ahead first, then a little to either side if that spot is off the NavMesh.
+            foreach (float angle in new[] { 0f, 15f, -15f, 30f, -30f, 50f, -50f })
+            {
+                foreach (float scale in new[] { 1f, 0.75f, 0.5f })
+                {
+                    Vector3 p = player.position + Quaternion.Euler(0f, angle, 0f) * forward * (openingDistance * scale);
+                    if (!NavMesh.SamplePosition(p, out NavMeshHit hit, navMeshSnap, NavMesh.AllAreas)) continue;
+                    Vector3 look = player.position - hit.position;
+                    look.y = 0f;
+                    var d = Instantiate(openingDino, hit.position, Quaternion.LookRotation(look), transform);
+                    alive.Add(d);
+                    return d;
+                }
+            }
+            return null;
+        }
+
         public void ClearAll()
         {
             Prune();
@@ -144,6 +198,16 @@ namespace BowGame
 
         DinoEntry PickEntry()
         {
+            // Guaranteed types first: if none of that kind is alive, it goes next.
+            Prune();
+            foreach (var e in dinosaurs)
+            {
+                if (!e.keepOneAlive || e.prefab == null || elapsed < e.unlockAfter) continue;
+                bool any = false;
+                foreach (var d in alive) if (d != null && d.GetType() == e.prefab.GetType() && d != opening) { any = true; break; }
+                if (!any) return e;
+            }
+
             float total = 0f;
             foreach (var e in dinosaurs) if (e.prefab != null && elapsed >= e.unlockAfter) total += Mathf.Max(0f, e.weight);
             if (total <= 0f) return null;
