@@ -398,6 +398,8 @@ namespace BowGame
             boss.projectilePrefab = orb; boss.throwHand = hand; boss.heldOrb = held;
 
             root.AddComponent<BossFace>();
+            var bar = root.AddComponent<BossHealthBar>();
+            bar.boss = boss; bar.anchor = head;
 
             PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + "/Boss.prefab");
             Object.DestroyImmediate(root);

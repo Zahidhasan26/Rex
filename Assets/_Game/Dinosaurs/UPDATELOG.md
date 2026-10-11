@@ -6,6 +6,13 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (boss fight in VR)
+
+- **`Boss/BossTest.unity` now runs in VR.** Zahid's `Player` prefab (the VR rig with the bow) stands at the origin, and the boss starts 18 m in front. The old flat-screen setup (camera and `DummyPlayer`) is kept but switched off under "Desktop Test (off - tick to use without headset)".
+- **`Scripts/BossHealthBar.cs`** (added to the Boss prefab by the builder): a world-space bar above the boss's head that always turns toward the headset and slides down as it takes hits. It is built from two quads, so no Canvas is needed in VR. It turns red when the boss enrages and hides when it dies.
+- **`Scripts/BossTestRestart.cs`** (test scenes only): press **A on the right controller** (or R on the keyboard) to restart the fight once the boss or the player is dead, without taking the headset off. It also stands in for GameFlow: the fight is "on" at the start, and the boss stops when the player dies.
+- Tested with the VR rig (no headset connected, so it ran on the flat screen): the boss targets the headset camera, its attacks lower the real `PlayerHealth`, and the player's death stops the boss. 8 of 8 arrows fired from head height landed in the body hitbox. No errors from our scripts.
+
 ## 2026-10-11 (final boss with face scan)
 
 New folder **`Boss/`** for the last act's boss: a tall man in a suit (2.5 m) whose face is the player's own photo.

@@ -307,6 +307,7 @@ GameObject:
   - component: {fileID: 8899911646338638646}
   - component: {fileID: 598370212589520817}
   - component: {fileID: 5822836837556711356}
+  - component: {fileID: 6879939706756789250}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Untagged
@@ -470,6 +471,26 @@ MonoBehaviour:
   maskColour: {r: 0.86, g: 0.84, b: 0.8, a: 1}
   toneBlend: 0.1
   photoBrightness: 0.92
+--- !u!114 &6879939706756789250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5334724550333912844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f69746449a07f54bbbe44a89acac2f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BowGame.BossHealthBar
+  boss: {fileID: 598370212589520817}
+  anchor: {fileID: 8494991266348282731}
+  heightAbove: 0.55
+  size: {x: 1.2, y: 0.09}
+  fillColour: {r: 0.85, g: 0.75, b: 0.2, a: 1}
+  rageColour: {r: 0.9, g: 0.15, b: 0.1, a: 1}
+  backColour: {r: 0, g: 0, b: 0, a: 0.6}
+  smoothing: 6
 --- !u!1 &7977996737720715228
 GameObject:
   m_ObjectHideFlags: 0
