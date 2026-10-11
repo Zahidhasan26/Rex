@@ -502,6 +502,12 @@ MonoBehaviour:
   retreatDistance: 9
   retreatSpeed: 1.6
   windUpTime: {x: 1, y: 2}
+  sidestep: 1
+  strafeSpeed: 1.8
+  strafeLegDuration: {x: 1, y: 2.6}
+  strafeHoldChance: 0.2
+  sidestepInsteadOfPause: 0.65
+  strafeRangeFraction: 0.85
   corpseTime: 4
   animator: {fileID: 685863845550146901}
   syncAnimationToSpeed: 1
@@ -510,6 +516,9 @@ MonoBehaviour:
   attackTrigger: Attack
   hitTrigger: Hit
   dieTrigger: Die
+  dieIndexParam: DieIndex
+  deathVariants: 3
+  strafeParam: Strafe
 --- !u!114 &7414243973169441573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1827,7 +1836,7 @@ Animator:
   m_GameObject: {fileID: 5393001729954417090}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 22100000, guid: 76a79590717e1c04fa3a71780f7d36f4, type: 2}
+  m_Controller: {fileID: 9100000, guid: ff808d8f2f1e4fd4ea437e690fceff43, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
