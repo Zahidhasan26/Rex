@@ -6,6 +6,16 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (misty spit)
+
+### Changed
+- **Spit is now mostly mist.**
+  - `Mist` sprays out of the mouth in a 22° cone (16–22 puffs), keeps billowing along the arc (32 puffs per metre) and slows down so it hangs in the air. Puffs grow up to 2.4× their size and drift with noise. It is denser and darker brown, fading in and out smoothly.
+  - `Clump` now uses the mist texture instead of droplets, so the travelling core is a dense brown cloud rather than solid blobs.
+  - `Droplets` are fine specks (1.5–5 cm, fewer) inside the mist.
+- `SpitSplash`: a bigger, longer-lasting mist puff on impact (12–16 puffs, 1–2 s, expanding) and finer droplets. The ground splat is unchanged.
+- `spit_mist.png`: denser cloud texture with more fine detail.
+
 ## 2026-10-11 (spit: earlier, more texture, brown)
 
 ### Changed
