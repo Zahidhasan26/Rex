@@ -29,7 +29,7 @@ MonoBehaviour:
   playAreaRadius: 25
   targetDistance: 14
   targetSpacing: 4
-  calmMusic: {fileID: 0}
+  calmMusic: {fileID: 8300000, guid: 3be4e1193f0d40f19192aaf332bf7e51, type: 3}
   battleMusic: {fileID: 0}
   musicVolume: 0.5
   musicFade: 2

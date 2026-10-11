@@ -70,6 +70,7 @@ namespace BowGame
         {
             if (config == null) { Debug.LogError("GameFlow: no GameConfig assigned."); yield break; }
             origin = FindAnyObjectByType<XROrigin>();
+            if (FindAnyObjectByType<JoystickMove>() == null) gameObject.AddComponent<JoystickMove>();   // left joystick always walks
             calm = MakeMusic("Music_Calm", config.calmMusic);
             battle = MakeMusic("Music_Battle", config.battleMusic);
             ringCenter = Ground(config.ringSpot.x, config.ringSpot.y);

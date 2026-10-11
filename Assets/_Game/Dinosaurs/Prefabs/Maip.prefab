@@ -470,6 +470,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.Maip
   bodyHitsToKill: 3
   headHitsToKill: 1
+  headShotWorth: 0
+  fragileAfterBites: 0
   legSlowMultiplier: 0.4
   legSlowDuration: 4
   moveSpeed: 4.2
@@ -498,10 +500,16 @@ MonoBehaviour:
   waitForPlayerLook: 0
   lookAngle: 55
   maxLookWait: 1.5
-  retreatAfterAttack: 0
+  retreatAfterAttack: 1
   retreatDistance: 9
   retreatSpeed: 1.6
   windUpTime: {x: 1, y: 2}
+  sidestep: 1
+  strafeSpeed: 1.8
+  strafeLegDuration: {x: 1, y: 2.6}
+  strafeHoldChance: 0.2
+  sidestepInsteadOfPause: 0.65
+  strafeRangeFraction: 0.85
   corpseTime: 4
   animator: {fileID: 1878181657778417154}
   syncAnimationToSpeed: 1
@@ -510,6 +518,9 @@ MonoBehaviour:
   attackTrigger: Attack
   hitTrigger: Hit
   dieTrigger: Die
+  dieIndexParam: DieIndex
+  deathVariants: 3
+  strafeParam: Strafe
 --- !u!114 &7414243973169441573
 MonoBehaviour:
   m_ObjectHideFlags: 0
