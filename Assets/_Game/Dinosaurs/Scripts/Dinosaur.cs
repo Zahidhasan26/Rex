@@ -192,7 +192,9 @@ namespace BowGame
             }
 
             // Occasional pause while still far away: stop, then carry on.
-            float wander01 = Mathf.InverseLerp(directApproachDistance, directApproachDistance + wanderFadeDistance, dist);
+            // Long-range attackers (Gorgosaurus spit) start their direct approach at their attack range, not before it.
+            float directFrom = Mathf.Max(directApproachDistance, attackRange);
+            float wander01 = Mathf.InverseLerp(directFrom, directFrom + wanderFadeDistance, dist);
             if (Time.time < pausedUntil)
             {
                 agent.isStopped = true;
@@ -211,7 +213,9 @@ namespace BowGame
             else if (charging && dist > chargeDistance * 1.5f) charging = false;
             agent.speed = CurrentSpeed(dist);
             agent.autoBraking = wander01 <= 0f;   // brake on the final run-in so it stops at biting range
-            agent.stoppingDistance = dist <= attackRange ? 1f : attackRange * 0.8f;
+            // While circling in, targets are waypoints a few metres ahead: never "arrive" early at one.
+            // (A stopping distance bigger than lookAhead froze long-range dinosaurs in place right after spawning.)
+            agent.stoppingDistance = wander01 > 0f ? 0.5f : (dist <= attackRange ? 1f : attackRange * 0.8f);
 
             if (Time.time >= nextRepath)
             {

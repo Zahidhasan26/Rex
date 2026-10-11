@@ -6,6 +6,16 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (stuck-on-spawn fix)
+
+### Fixed
+- **Gorgosaurus froze right after spawning.** Its NavMeshAgent stopping distance was `attackRange × 0.8` = 11.2 m (spit range 14 m), but while circling in, each move target is only `lookAhead` = 8 m ahead. The agent counted every waypoint as already reached and never moved. This started when the Gorgosaurus range went back to 14 m with the spit; the Maip (3.8 m range) was unaffected.
+  - While circling in, the stopping distance is now 0.5 m. The attack-range stopping distance only applies on the final direct approach.
+  - The direct approach now starts at `max(directApproachDistance, attackRange)`, so a long-range attacker never circles inside its own attack range.
+
+### Tested (DinoTest, 100 s, spawner sped up, dinosaurs killed as they arrived)
+- 94 spawned (Maip and Gorgosaurus). 0 stuck. Every one reached attack range 5–12 s after spawning. No errors.
+
 ## 2026-10-10 (project check fixes)
 
 ### Fixed
