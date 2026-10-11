@@ -340,7 +340,7 @@ MonoBehaviour:
   bodyHitsToKill: 3
   legSlowMultiplier: 0.4
   legSlowDuration: 4
-  moveSpeed: 6
+  moveSpeed: 4.2
   turnSpeed: 360
   repathInterval: {x: 0.3, y: 0.7}
   speedVariance: 0.15
@@ -354,9 +354,9 @@ MonoBehaviour:
   pauseChancePerSecond: 0.05
   pauseDuration: {x: 0.6, y: 1.8}
   chargeDistance: 10
-  chargeSpeedMultiplier: 1.5
+  chargeSpeedMultiplier: 1.3
   attackRange: 3.8
-  attackCooldown: 1.2
+  attackCooldown: 2.6
   damage: 10
   biteDelay: 0.35
   recoverTime: 0.4
