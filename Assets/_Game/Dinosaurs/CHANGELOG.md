@@ -6,6 +6,19 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (project check fixes)
+
+### Fixed
+- `Dinosaur.cs` death fallback: the tip-over only ran when nothing listened to `Died`. Since `DinoAudio` listens, a dinosaur without `ProceduralDinoAnim` would freeze upright on death. It now checks for `ProceduralDinoAnim` instead.
+- `DinoSpawner.cs` opening dinosaur: if the opening dinosaur was removed without dying (`ClearAll`, destroyed), the spawner spawned a new opening dinosaur every frame. It now spawns the opening dinosaur once and treats a removed one as finished.
+- `Gorgosaurus.prefab`: `Dinosaur.syncAnimationToSpeed` turned off, because `ProceduralDinoAnim` (match anim speed) already drives the Animator speed. Two scripts were setting it every frame.
+
+### Checked
+- Compiles with no errors.
+- No missing scripts or broken references in any `_Game` prefab except `Player.prefab` (see the note below).
+- Ran DinoTest, CombatTest, PlayerTest and Main in Play mode with no errors.
+- Opening dinosaur, then normal spawns, then `ClearAll` during the opening: behaves correctly.
+
 ## 2026-10-10 (merged latest main)
 
 ### Merge

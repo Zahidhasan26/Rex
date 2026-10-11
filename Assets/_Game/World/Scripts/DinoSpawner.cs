@@ -69,6 +69,7 @@ namespace BowGame
         bool running;
         Dinosaur opening;
         bool openingPending;
+        bool openingSpawned;
 
         public int AliveCount { get { Prune(); return alive.Count; } }
 
@@ -114,6 +115,7 @@ namespace BowGame
             elapsed = 0f;
             nextSpawn = firstSpawnDelay;
             opening = null;
+            openingSpawned = false;
             openingPending = openingDino != null;
         }
 
@@ -126,13 +128,15 @@ namespace BowGame
             // Opening: one dinosaur alone. The clock for everything else starts when it dies.
             if (openingPending)
             {
-                if (opening == null)
+                if (!openingSpawned)
                 {
                     opening = SpawnOpening();
+                    openingSpawned = true;
                     if (opening == null) openingPending = false;   // no valid spot: don't block the round
                     return;
                 }
-                if (!opening.IsDead) return;
+                // Dead, or removed some other way (ClearAll, destroyed): either way the opening is over.
+                if (opening != null && !opening.IsDead) return;
                 openingPending = false;
                 elapsed = 0f;
                 nextSpawn = delayAfterOpening;

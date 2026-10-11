@@ -380,7 +380,7 @@ namespace BowGame
 
             Died?.Invoke();
             if (HasParam(dieTrigger)) SetAnimTrigger(dieTrigger);
-            else if (Died == null)   // stand-in when nothing else animates the death
+            else if (GetComponent<ProceduralDinoAnim>() == null)   // stand-in when nothing else animates the death (sound listeners on Died don't count)
             {
                 if (animator != null) animator.speed = 0f;   // freeze the pose
                 StartCoroutine(FallOver());
