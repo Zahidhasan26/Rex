@@ -51,7 +51,11 @@ namespace BowGame
             animator = GetComponentInChildren<Animator>();
             phase = Random.Range(0f, 10f);
             BakePose();
+            if (animator != null && animator.runtimeAnimatorController != null)
+                foreach (var p in animator.parameters) if (p.name == "Die") hasDeathClip = true;
         }
+
+        bool hasDeathClip;
 
         void BakePose()
         {
@@ -59,6 +63,7 @@ namespace BowGame
             var clips = animator.runtimeAnimatorController.animationClips;
             if (clips == null || clips.Length == 0) return;
             var clip = clips[0];
+            foreach (var c in clips) if (c != null && c.name.EndsWith("_Loop")) { clip = c; break; }   // the run cycle, not a strafe or death clip
 
             bones = animator.GetComponentsInChildren<Transform>(true);
             poseRot = new Quaternion[bones.Length];
@@ -87,7 +92,12 @@ namespace BowGame
         {
             if (bones == null) return;
 
-            if (!dino.IsDead)   // after death, hold whatever blend we had so the body doesn't snap
+            if (dino.IsDead)
+            {
+                // A death clip takes over the whole body: fade the standing pose out. Without one, hold it.
+                if (hasDeathClip) weight = Mathf.MoveTowards(weight, 0f, blendSpeed * Time.deltaTime);
+            }
+            else
             {
                 float speed = agent != null && agent.enabled ? agent.velocity.magnitude : 0f;
                 bool standing = speed < standingSpeed || dino.IsAttacking;

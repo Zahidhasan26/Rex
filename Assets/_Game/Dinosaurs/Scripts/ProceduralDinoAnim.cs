@@ -147,15 +147,26 @@ namespace BowGame
             attackHoldUntil = Time.time + attackMinHold;
         }
 
+        // True when the Animator has real death clips (a "Die" trigger). Then the clip plays the fall and
+        // this script only sinks the body before it is removed.
+        bool AnimatorHasDeath()
+        {
+            if (animator == null || animator.runtimeAnimatorController == null) return false;
+            foreach (var p in animator.parameters) if (p.name == "Die") return true;
+            return false;
+        }
+        bool clipDeath;
+
         void OnDied()
         {
             dead = true;
+            clipDeath = AnimatorHasDeath();
             deathTime = Time.time;
             corpseTime = dino != null ? dino.corpseTime : 3f;
             deathRollSign = Random.value < 0.5f ? -1f : 1f;
             deathStartRotation = transform.rotation;
             deathStartPosition = transform.position;
-            if (animator != null) animator.speed = 0f;   // freeze the clip; bone poses below still apply
+            if (animator != null && !clipDeath) animator.speed = 0f;   // freeze the clip; bone poses below still apply
         }
 
         // ---------- every frame, after the Animator ----------
@@ -164,11 +175,17 @@ namespace BowGame
         {
             BeginFrame();
 
-            if (dead) { ApplyDeath(); return; }
+            if (dead) { if (clipDeath) ApplySinkOnly(); else ApplyDeath(); return; }
 
             ApplyWalk();
             ApplyAttack();
             ApplyHit();
+        }
+
+        float ForwardSpeed()
+        {
+            if (agent == null || !agent.enabled) return 0f;
+            return Mathf.Max(0f, Vector3.Dot(agent.velocity, transform.forward));
         }
 
         float MoveSpeed()
@@ -181,17 +198,18 @@ namespace BowGame
         void ApplyWalk()
         {
             float speed = MoveSpeed();
+            float forwardSpeed = ForwardSpeed();
 
             if (matchAnimSpeedToMovement && animator != null)
                 animator.speed = Mathf.Clamp(speed / animReferenceSpeed, animMinSpeed, animMaxSpeed);
 
             if (!proceduralWalk) return;
 
-            float target = Mathf.Clamp01(speed / fullWalkSpeed);
+            float target = Mathf.Clamp01(forwardSpeed / fullWalkSpeed);   // sideways steps come from the strafe clips
             walkWeight = Mathf.MoveTowards(walkWeight, target, Time.deltaTime * 4f);
             if (walkWeight <= 0.001f) return;
 
-            walkPhase += Time.deltaTime * speed / strideLength * Mathf.PI * 2f;
+            walkPhase += Time.deltaTime * forwardSpeed / strideLength * Mathf.PI * 2f;
             if (walkPhase > Mathf.PI * 2f) walkPhase -= Mathf.PI * 2f;
 
             float w = walkWeight;
@@ -240,6 +258,15 @@ namespace BowGame
             Pitch(head, attackHeadPitch * w);
             Yaw(head, shake);
             Pitch(jaw, attackJawOpen * w);
+        }
+
+        // Death clip is playing: only sink into the ground at the very end.
+        void ApplySinkOnly()
+        {
+            float t = Time.time - deathTime;
+            float sinkStart = Mathf.Max(0f, corpseTime - deathSinkDuration);
+            float sink = Ease(Mathf.Clamp01((t - sinkStart) / deathSinkDuration));
+            transform.position = deathStartPosition + Vector3.down * deathSinkDepth * sink;
         }
 
         void ApplyDeath()

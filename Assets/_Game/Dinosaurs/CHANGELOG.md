@@ -6,6 +6,16 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (death variants and sidestepping)
+
+### Changed
+- `Dinosaur.cs`: sidestepping behaviour and the `Strafe` / `DieIndex` animator parameters (details in UPDATELOG). Speed sync plays the sidestep clips near full speed.
+- **`ProceduralDinoAnim.cs` (Halar's script, two small changes):**
+  - If the Animator has a `Die` trigger, the death clip plays the fall. The script no longer freezes the Animator or rolls the body; it only sinks the body before it is removed.
+  - The procedural Maip walk now uses forward speed only, so it doesn't fight the sidestep clips.
+- `DinoIdlePose.cs`: fades out on death so the death clip shows (it used to hold the standing pose). It picks the `_Loop` clip for its pose now that the controller holds several clips.
+- `Maip.controller`, `Gorgosaurus.controller`: rebuilt by `DinoClipBuilder` (the old single "Loop" state is now the middle of the Locomotion blend tree).
+
 ## 2026-10-11 (lighter spit, idle while spitting)
 
 ### Changed

@@ -84,6 +84,19 @@ namespace BowGame
         [Tooltip("Seconds it stands and glares before charging again.")]
         public Vector2 windUpTime = new Vector2(1.0f, 2.0f);
 
+        [Header("Sidestepping (circle the player instead of standing still)")]
+        [Tooltip("Between attacks, and sometimes instead of a pause, step sideways around the player while facing it.")]
+        public bool sidestep = true;
+        public float strafeSpeed = 1.8f;
+        [Tooltip("Seconds each sideways run lasts before it may change direction or stop.")]
+        public Vector2 strafeLegDuration = new Vector2(1.0f, 2.6f);
+        [Tooltip("Chance that a strafe leg is a short stand-and-watch instead of moving.")]
+        [Range(0f, 1f)] public float strafeHoldChance = 0.2f;
+        [Tooltip("Chance that a far-away pause becomes a sideways shuffle instead of standing still.")]
+        [Range(0f, 1f)] public float sidestepInsteadOfPause = 0.65f;
+        [Tooltip("While circling between attacks, keep this fraction of attackRange from the player.")]
+        [Range(0.3f, 1f)] public float strafeRangeFraction = 0.85f;
+
         [Header("Death")]
         [Tooltip("Seconds the body stays before it is removed.")]
         public float corpseTime = 4f;
@@ -97,6 +110,9 @@ namespace BowGame
         public string attackTrigger = "Attack";      // trigger
         public string hitTrigger = "Hit";            // trigger
         public string dieTrigger = "Die";            // trigger
+        public string dieIndexParam = "DieIndex";    // int: which death variant
+        public int deathVariants = 3;
+        public string strafeParam = "Strafe";        // float: -1 sideways left .. 0 forward .. +1 sideways right
 
         protected NavMeshAgent agent;
         protected bool isDead;
@@ -127,6 +143,13 @@ namespace BowGame
         public event System.Action<HitZone, Vector3> Hit;          // any arrow hit, including the killing one, with the hit point
 
         bool charging;
+
+        // sidestep state
+        bool strafing;
+        float strafeDir = 1f;
+        float strafeLegUntil;
+        bool strafeHolding;
+        float strafeAnim;
 
         protected virtual void Awake()
         {
@@ -178,10 +201,18 @@ namespace BowGame
 
             if (dist <= attackRange && CanAttack(player))
             {
+                bool ready = Time.time >= nextAttackTime;
+                if (!ready && sidestep)
+                {
+                    // Waiting for the next attack: circle sideways instead of standing still.
+                    Strafe(player, dist, Mathf.Clamp(dist, attackRange * 0.5f, attackRange * strafeRangeFraction));
+                    return;
+                }
+                StopStrafe();
                 agent.isStopped = true;
                 agent.velocity = Vector3.zero;   // plant its feet instead of sliding through the player
                 FaceTowards(player.position);
-                if (Time.time >= nextAttackTime && PlayerIsWatching(player))
+                if (ready && PlayerIsWatching(player))
                 {
                     lookWaitStart = -1f;
                     nextAttackTime = Time.time + attackCooldown * Random.Range(0.85f, 1.2f);
@@ -197,6 +228,7 @@ namespace BowGame
             float wander01 = Mathf.InverseLerp(directFrom, directFrom + wanderFadeDistance, dist);
             if (Time.time < pausedUntil)
             {
+                if (strafing) { Strafe(player, dist, dist); return; }   // sideways shuffle "pause"
                 agent.isStopped = true;
                 FaceTowards(player.position, 0.3f);
                 return;
@@ -204,10 +236,13 @@ namespace BowGame
             if (wander01 >= 1f && Random.value < pauseChancePerSecond * Time.deltaTime)
             {
                 pausedUntil = Time.time + Random.Range(pauseDuration.x, pauseDuration.y);
+                if (sidestep && Random.value < sidestepInsteadOfPause) BeginStrafe(false);
+                else StopStrafe();
                 Paused?.Invoke();
                 return;
             }
 
+            StopStrafe();
             agent.isStopped = false;
             if (!charging && dist <= chargeDistance) { charging = true; ChargeStarted?.Invoke(); }
             else if (charging && dist > chargeDistance * 1.5f) charging = false;
@@ -221,6 +256,58 @@ namespace BowGame
             {
                 nextRepath = Time.time + Random.Range(repathInterval.x, repathInterval.y);
                 agent.SetDestination(PickMoveTarget(player.position, dist, wander01));
+            }
+        }
+
+        // ---------- sidestepping ----------
+
+        void BeginStrafe(bool allowHold)
+        {
+            if (!strafing) strafeDir = Random.value < 0.5f ? -1f : 1f;
+            else if (Random.value < 0.45f) strafeDir = -strafeDir;
+            strafing = true;
+            strafeHolding = allowHold && Random.value < strafeHoldChance;
+            strafeLegUntil = Time.time + Random.Range(strafeLegDuration.x, strafeLegDuration.y) * (strafeHolding ? 0.5f : 1f);
+            agent.updateRotation = false;   // keep facing the player while moving sideways
+        }
+
+        void StopStrafe()
+        {
+            if (!strafing) return;
+            strafing = false;
+            agent.updateRotation = true;
+        }
+
+        // Moves around the player on a circle of the given radius, facing it, in strafeDir (+1 = to its right).
+        void Strafe(Transform player, float dist, float radius)
+        {
+            if (!strafing || Time.time >= strafeLegUntil) BeginStrafe(true);
+            FaceTowards(player.position);
+
+            if (strafeHolding)
+            {
+                agent.isStopped = true;
+                return;
+            }
+
+            Vector3 fromPlayer = transform.position - player.position;
+            fromPlayer.y = 0f;
+            if (fromPlayer.sqrMagnitude < 0.01f) fromPlayer = -player.forward;
+            float stepAngle = strafeSpeed * 0.6f / Mathf.Max(1f, radius) * Mathf.Rad2Deg;
+            // Our right, seen from the dinosaur facing the player, is a clockwise turn around the player.
+            Vector3 next = Quaternion.Euler(0f, -strafeDir * stepAngle, 0f) * fromPlayer.normalized * radius;
+            Vector3 target = player.position + next;
+            target.y = transform.position.y;
+
+            agent.isStopped = false;
+            agent.speed = strafeSpeed * (Time.time < slowUntil ? legSlowMultiplier : 1f);
+            agent.autoBraking = false;
+            agent.stoppingDistance = 0.1f;
+            if (Time.time >= nextRepath)
+            {
+                nextRepath = Time.time + 0.25f;
+                if (NavMesh.SamplePosition(target, out NavMeshHit hit, 2f, NavMesh.AllAreas)) agent.SetDestination(hit.position);
+                else { strafeDir = -strafeDir; strafeLegUntil = Time.time + 0.8f; }   // blocked: go the other way
             }
         }
 
@@ -313,11 +400,23 @@ namespace BowGame
 
         void UpdateAnimation()
         {
-            float v = agent.enabled ? agent.velocity.magnitude : 0f;
+            Vector3 vel = agent.enabled ? agent.velocity : Vector3.zero;
+            vel.y = 0f;
+            float v = vel.magnitude;
             SetAnimFloat(speedParam, v);
+
+            // -1..+1 when moving sideways (relative to where the dinosaur faces), 0 when moving forward or standing.
+            float side = Vector3.Dot(vel, transform.right);
+            float fwd = Vector3.Dot(vel, transform.forward);
+            float strafeTarget = (v > 0.3f && Mathf.Abs(side) > Mathf.Abs(fwd)) ? Mathf.Sign(side) : 0f;
+            strafeAnim = Mathf.MoveTowards(strafeAnim, strafeTarget, Time.deltaTime * 4f);
+            SetAnimFloat(strafeParam, strafeAnim);
+
             if (animator != null && syncAnimationToSpeed && !HasParam(speedParam))
             {
                 float target = Mathf.Clamp(v / Mathf.Max(0.1f, moveSpeed), animationSpeedRange.x, animationSpeedRange.y);
+                // Sidestep clips are authored for a normal pace: play them near full speed.
+                target = Mathf.Lerp(target, Mathf.Clamp(v / Mathf.Max(0.1f, strafeSpeed), 0.6f, 1.3f), Mathf.Abs(strafeAnim));
                 animator.speed = Mathf.MoveTowards(animator.speed, target, Time.deltaTime * 2f);
             }
         }
@@ -382,8 +481,15 @@ namespace BowGame
             agent.enabled = false;
             foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
 
+            StopStrafe();
             Died?.Invoke();
-            if (HasParam(dieTrigger)) SetAnimTrigger(dieTrigger);
+            if (HasParam(dieTrigger))
+            {
+                // A real death animation: pick one of the variants and let it play at normal speed.
+                if (HasParam(dieIndexParam)) animator.SetInteger(dieIndexParam, Random.Range(0, Mathf.Max(1, deathVariants)));
+                animator.speed = 1f;
+                SetAnimTrigger(dieTrigger);
+            }
             else if (GetComponent<ProceduralDinoAnim>() == null)   // stand-in when nothing else animates the death (sound listeners on Died don't count)
             {
                 if (animator != null) animator.speed = 0f;   // freeze the pose

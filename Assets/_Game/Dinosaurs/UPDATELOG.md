@@ -6,6 +6,33 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (death variants and sidestepping)
+
+### Animation clips (`Animation/Clips/`): real Unity clips, keyed on every bone
+- `<Dino>_Death_FallLeft`, `<Dino>_Death_FallRight`: staggers with the head thrown up, the legs buckle, rolls about 82° onto that side and slides a little, the head hits the ground and bounces, the tail whips then goes limp, and there is a last leg twitch. The body ends lying on the ground (the drop is measured from the mesh).
+- `<Dino>_Death_Collapse`: flinches back, the knees fold, flops onto its belly, the head slams down and bounces, the tail drops, and a final twitch.
+- `<Dino>_StrafeLeft`, `<Dino>_StrafeRight` (looping): sideways steps. The legs alternately lift and cross toward the step direction (the Maip's front legs move in diagonal pairs), the body sways and bobs, and the tail leans against the motion. The clips play in place; the NavMeshAgent moves the body.
+- Made for both the Maip and the Gorgosaurus (10 clips).
+
+### Tools
+- **`Editor/DinoClipBuilder.cs`**: menu **BowGame > Dinosaurs > Build Death and Sidestep Clips**. It rebuilds all the clips and both Animator Controllers. All timing and angle numbers live in this file, so they can be tuned and re-run.
+
+### Animator Controllers (`Maip.controller`, `Gorgosaurus.controller`), rebuilt
+- `Locomotion` blend tree on the float `Strafe`: −1 = StrafeLeft, 0 = the model's original clip, +1 = StrafeRight.
+- `Death_FallLeft`, `Death_FallRight`, `Death_Collapse`: entered from Any State on the trigger `Die` plus the int `DieIndex` (0, 1, 2), with a 0.15 s blend.
+
+### Behaviour (`Dinosaur.cs`): "Sidestepping" settings
+- **Between attacks**, instead of standing still in range, dinosaurs circle the player sideways while facing it (at 85% of attack range). They change direction at random every 1–2.6 s, sometimes stop briefly to watch (20%), and turn around if blocked. When the attack is ready they plant and attack.
+- **Far-away pauses** become a sideways shuffle 65% of the time instead of standing.
+- Strafe speed is 1.8 m/s (slowed by leg hits too).
+- The `Strafe` animator value comes from the actual sideways speed, so the clip matches the movement.
+- **On death** a random variant is picked (`deathVariants` = 3) and the Animator runs at normal speed.
+
+### Tested (Play mode, DinoTest)
+- Both dinosaurs alternate: sidestep left, sidestep right, short hold, attack (Maip bite / Gorgosaurus spit). The `Strafe` value tracks the movement (±1 while sidestepping, 0 when attacking).
+- Six dinosaurs killed at once played FallLeft, FallRight and Collapse as rolled, at normal speed, and ended lying on the ground.
+- No errors or warnings.
+
 ## 2026-10-11 (Gorgosaurus idle)
 
 - **`Scripts/DinoIdlePose.cs`** (on `Gorgosaurus.prefab`): the Gorgosaurus only has a run clip, so when standing it used to run in place, including while spitting. Now, when it stands still or attacks, it blends (0.25 s) into a planted standing pose. The pose is built from two frames of the run clip: the body and left leg at 50% (left foot down), and the right leg at 0% (right foot down). It also gets slow breathing in the chest (±1.5°, 2.6 s) and a lazy tail sway (±2.5°, 3.6 s).
