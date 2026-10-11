@@ -185,7 +185,7 @@ namespace BowGame
         float ForwardSpeed()
         {
             if (agent == null || !agent.enabled) return 0f;
-            return Mathf.Max(0f, Vector3.Dot(agent.velocity, transform.forward));
+            return Vector3.Dot(agent.velocity, transform.forward);   // negative = walking backwards
         }
 
         float MoveSpeed()
@@ -205,12 +205,13 @@ namespace BowGame
 
             if (!proceduralWalk) return;
 
-            float target = Mathf.Clamp01(forwardSpeed / fullWalkSpeed);   // sideways steps come from the strafe clips
+            float target = Mathf.Clamp01(Mathf.Abs(forwardSpeed) / fullWalkSpeed);   // sideways steps come from the strafe clips
             walkWeight = Mathf.MoveTowards(walkWeight, target, Time.deltaTime * 4f);
             if (walkWeight <= 0.001f) return;
 
             walkPhase += Time.deltaTime * forwardSpeed / strideLength * Mathf.PI * 2f;
             if (walkPhase > Mathf.PI * 2f) walkPhase -= Mathf.PI * 2f;
+            if (walkPhase < 0f) walkPhase += Mathf.PI * 2f;   // backwards: the legs cycle the other way
 
             float w = walkWeight;
             float sL = Mathf.Sin(walkPhase);

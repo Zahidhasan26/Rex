@@ -23,6 +23,13 @@ namespace BowGame
             public bool keepOneAlive = false;
         }
 
+        [Header("Front arc (set by GameFlow)")]
+        [Tooltip("If on, dinosaurs only spawn in front of the arena (frontDirection), toward the edges of the player's view, never behind.")]
+        public bool useFrontArc = false;
+        public Vector3 frontDirection = Vector3.forward;
+        [Tooltip("Degrees left or right of the front direction a spawn may be (min..max).")]
+        public Vector2 frontArcAngles = new Vector2(35f, 90f);
+
         [Header("Opening (alpha)")]
         [Tooltip("Optional. This one dinosaur spawns alone, in front of the player. Nothing else spawns until it is dead.")]
         public Dinosaur openingDino;
@@ -172,7 +179,7 @@ namespace BowGame
         Dinosaur SpawnOpening()
         {
             Transform player = GameRefs.PlayerHead;
-            Vector3 forward = player.forward;
+            Vector3 forward = useFrontArc ? frontDirection : player.forward;
             forward.y = 0f;
             forward = forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
 
@@ -230,14 +237,17 @@ namespace BowGame
         {
             Transform player = GameRefs.PlayerHead;
             Vector3 center = player != null ? player.position : transform.position;
-            Vector3 forward = player != null ? player.forward : Vector3.forward;
+            Vector3 forward = useFrontArc ? frontDirection : (player != null ? player.forward : Vector3.forward);
             forward.y = 0f;
             forward = forward.sqrMagnitude > 0.001f ? forward.normalized : Vector3.forward;
 
-            // Allowed arc is everything outside the view cone: from +hidden to 360-hidden degrees.
+            // Normally: everything outside the view cone (+hidden to 360-hidden degrees).
+            // Front arc: only in front of the arena, between frontArcAngles left or right of the front direction.
             for (int i = 0; i < placementAttempts; i++)
             {
-                float angle = Random.Range(hiddenFromViewAngle, 360f - hiddenFromViewAngle);
+                float angle = useFrontArc
+                    ? Random.Range(frontArcAngles.x, frontArcAngles.y) * (Random.value < 0.5f ? -1f : 1f)
+                    : Random.Range(hiddenFromViewAngle, 360f - hiddenFromViewAngle);
                 Vector3 dir = Quaternion.Euler(0f, angle, 0f) * forward;
                 Vector3 p = center + dir * Random.Range(spawnDistance.x, spawnDistance.y);
 

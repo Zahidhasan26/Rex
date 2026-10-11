@@ -15,6 +15,13 @@ namespace BowGame
         public int bodyHitsToKill = 3;
         [Tooltip("Head hits needed to kill. 1 = any headshot kills. A head hit counts as bodyHitsToKill / headHitsToKill body hits.")]
         public int headHitsToKill = 1;
+        [Tooltip("If above 0, one headshot counts as this many body shots instead (headHitsToKill is then ignored). Alpha: 2, with bodyHitsToKill 5 = 2 headshots + 1 body shot, or 5 body shots, and mixes add up.")]
+        public float headShotWorth = 0f;
+        [Tooltip("Alpha rule. If above 0: arrows can't kill it until it has bitten the player this many times; after that ONE arrow anywhere kills it.")]
+        public int fragileAfterBites = 0;
+        public static event System.Action<Dinosaur> BecameFragile;   // raised once when the rule above is met
+        int bitesLanded;
+        public bool IsFragile => fragileAfterBites > 0 && bitesLanded >= fragileAfterBites;
 
         [Header("Leg hits slow the dinosaur")]
         [Range(0.05f, 1f)] public float legSlowMultiplier = 0.4f;
@@ -436,6 +443,8 @@ namespace BowGame
                 FlatDistance(transform.position, player.position) <= attackRange * biteReachMultiplier)
             {
                 GameEvents.RaisePlayerHit(damage, transform.position);
+                bitesLanded++;
+                if (fragileAfterBites > 0 && bitesLanded == fragileAfterBites) BecameFragile?.Invoke(this);
             }
 
             yield return new WaitForSeconds(recoverTime);
@@ -451,10 +460,16 @@ namespace BowGame
 
             pausedUntil = 0f;   // getting shot snaps it out of a pause
             Hit?.Invoke(zone, hitPoint);
+            if (fragileAfterBites > 0)
+            {
+                if (IsFragile) { Die(); return; }
+                WasHit?.Invoke(zone);   // flinches, but can't be hurt until it has bitten enough
+                return;
+            }
             switch (zone)
             {
                 case HitZone.Head:
-                    damageTaken += (float)bodyHitsToKill / Mathf.Max(1, headHitsToKill);
+                    damageTaken += headShotWorth > 0f ? headShotWorth : (float)bodyHitsToKill / Mathf.Max(1, headHitsToKill);
                     if (damageTaken >= bodyHitsToKill - 0.01f) { Die(); return; }
                     break;
                 case HitZone.Body:

@@ -9,6 +9,7 @@ namespace BowGame
     // When the EMG armband is connected, flexing also grabs the string and relaxing releases it.
     public class Bow : MonoBehaviour
     {
+        public static event System.Action Fired;   // an arrow was shot (used by the practice step)
         public static float CurrentDraw;       // 0..1, read by the HUD
 
         [Header("Parts (set up by the Player prefab)")]
@@ -150,6 +151,7 @@ namespace BowGame
             Vector3 start = transform.position + dir * 0.1f;
             var arrow = Instantiate(arrowPrefab, start, Quaternion.LookRotation(dir));
             arrow.Launch(dir * Mathf.Lerp(minSpeed, maxSpeed, strength), ownerRoot, strength);
+            Fired?.Invoke();
             Debug.Log("[Bow] fired, draw " + strength.ToString("0.00"));
 
             if (audioSource != null && releaseClip != null) audioSource.PlayOneShot(releaseClip);

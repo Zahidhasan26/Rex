@@ -157,6 +157,20 @@ They split these between themselves and say in the team chat who has which. A se
 
 Fast mode is the demo mode. Build and test it first.
 
+## 5b. After Act 1 (planned, not built yet)
+
+Nothing in this section has code yet. Build it only after Act 1 is approved and working.
+
+**Cutscene (end of Act 1, start of Part 2)**
+- When the Act 1 round ends, the player is frozen where they stand (no movement, no bow).
+- A video plays on a large screen in front of them: meteors falling on the terrain (made from the map screenshots in `Logs/MapShotsOut`), with sound effects and a voice-over baked into the video.
+- Video file: `Assets/_Game/Flow/Video/` (team supplies it). Played with Unity's `VideoPlayer` on a world-space quad in front of the player's head, with audio from the video.
+- When the video ends: Part 2 starts.
+
+**Part 2: boss fight (only if there is time)**
+- A second round against the boss, as in the original plan (fixed body, uploaded-photo face, kill him in time or he snaps his fingers).
+- Not designed in detail yet. Decide after Act 1 is finished.
+
 ## 6. Contracts (shared code and signals)
 
 These names are fixed. Everyone's code talks to other people's code **only** through them. Zahid commits these files in `Assets/_Game/Core` before anyone else starts. Changing them needs the whole team to agree.

@@ -470,6 +470,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.Maip
   bodyHitsToKill: 5
   headHitsToKill: 2
+  headShotWorth: 2
   legSlowMultiplier: 0.4
   legSlowDuration: 4
   moveSpeed: 5.2

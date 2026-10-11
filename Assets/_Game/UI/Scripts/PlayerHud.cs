@@ -15,12 +15,15 @@ namespace BowGame
         public Transform flashQuad;
         public float barWidth = 0.12f;
 
+        public static PlayerHud Instance;
+
         float flash;
         Color flashColor = new Color(1f, 0f, 0f, 0f);
         float messageUntil = -1f;
 
         void OnEnable()
         {
+            Instance = this;
             PlayerHealth.Damaged += OnDamaged;
             GameEvents.StateChanged += OnState;
             GameEvents.PlayerDied += OnDied;
@@ -30,6 +33,7 @@ namespace BowGame
 
         void OnDisable()
         {
+            if (Instance == this) Instance = null;
             PlayerHealth.Damaged -= OnDamaged;
             GameEvents.StateChanged -= OnState;
             GameEvents.PlayerDied -= OnDied;
@@ -60,7 +64,7 @@ namespace BowGame
 
         void OnDied() { Show("You died", 3f); }
 
-        void Show(string text, float seconds)
+        public void Show(string text, float seconds)
         {
             if (messageText == null) return;
             messageText.text = text;
