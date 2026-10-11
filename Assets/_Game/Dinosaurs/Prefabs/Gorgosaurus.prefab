@@ -196,6 +196,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BowGame.HitZoneMarker
   zone: 2
+--- !u!1 &2135142755276451586
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6756227712920260319}
+  m_Layer: 0
+  m_Name: SpitMouth
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6756227712920260319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2135142755276451586}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.13785286, y: 1.2024157, z: 0.1095596}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4855658379640325991}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3893290893988514483
 GameObject:
   m_ObjectHideFlags: 0
@@ -310,9 +341,9 @@ MonoBehaviour:
   hitTrigger: Hit
   dieTrigger: Die
   spitPrefab: {fileID: 6983722379022094238, guid: 4a30ebde3d1e207478036ae3559ead67, type: 3}
-  spitOrigin: {fileID: 4855658379640325991}
+  spitOrigin: {fileID: 6756227712920260319}
   spitHeight: 2
-  spitDelay: 0.5
+  spitDelay: 0.15
   needLineOfSight: 1
   sightBlockers:
     serializedVersion: 2
@@ -1041,6 +1072,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4035562012936842069}
+    - targetCorrespondingSourceObject: {fileID: -980673059403975539, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6756227712920260319}
     - targetCorrespondingSourceObject: {fileID: 1365118069703089724, guid: 2a81bb8adf44b334a9946da795325071, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5511643812802829893}

@@ -6,6 +6,17 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (spit: earlier, more texture, brown)
+
+### Changed
+- **Spit comes out earlier:** `Gorgosaurus.spitDelay` changed from 0.5 s to 0.15 s, so it fires as the jaw finishes opening (Halar's attack opens the mouth over 0.15 s). It now leaves from a new `SpitMouth` point inside the front of the mouth (child of the head bone), not from the middle of the head. Measured in Play mode: 0.15 s from attack start to spit.
+- **More texture:**
+  - New 256 px droplet texture: viscous body with grain, a darker thick edge and a glossy highlight.
+  - New 256 px wispy mist texture and new 512 px splat texture (darker rim, foam bubbles, more streaks and specks).
+  - More particles: mouth burst 40–52 droplets (was 24–32), 45 droplets per metre of flight (was 34), 13–16 clump pieces (was 9–12), more mist; ground splash 38–48 droplets.
+  - Droplets streak a bit more.
+- **Colour: muddy brown instead of acid green.** Droplets and the clump are amber to dark brown, the mist is a dusty brown haze, and the splat is wet dark brown and slightly bigger (1.0–1.7 m).
+
 ## 2026-10-11 (spray-style acid spit)
 
 ### Changed
