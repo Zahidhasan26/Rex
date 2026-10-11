@@ -6,6 +6,13 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-10 (sound)
+
+### Changed
+- `Dinosaur.cs`: added the events listed in UPDATELOG (sound hooks). Behaviour is unchanged.
+- `Maip.prefab`, `Gorgosaurus.prefab`: added the `DinoAudio` component, two AudioSources and a `Voice` child under the head bone.
+- `DinoTest`: added the `AmbientAudio` prefab.
+
 ## 2026-10-10 (DinoTest uses the spawner)
 
 ### Changed

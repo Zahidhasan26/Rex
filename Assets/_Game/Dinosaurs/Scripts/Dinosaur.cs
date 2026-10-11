@@ -93,6 +93,17 @@ namespace BowGame
 
         public bool IsDead => isDead;
 
+        // Events for other components on the dinosaur (sound, effects). Nothing outside the dinosaur uses these.
+        public event System.Action Spawned;
+        public event System.Action Paused;
+        public event System.Action ChargeStarted;
+        public event System.Action AttackStarted;
+        public event System.Action<HitZone, Vector3> Hit;
+        public event System.Action Died;
+        public event System.Action Collapsed;
+
+        bool charging;
+
         protected virtual void Awake()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -108,6 +119,7 @@ namespace BowGame
         protected virtual void Start()
         {
             agent.speed = moveSpeed * personalSpeed;
+            Spawned?.Invoke();
         }
 
         protected virtual void Update()
@@ -157,10 +169,13 @@ namespace BowGame
             if (wander01 >= 1f && Random.value < pauseChancePerSecond * Time.deltaTime)
             {
                 pausedUntil = Time.time + Random.Range(pauseDuration.x, pauseDuration.y);
+                Paused?.Invoke();
                 return;
             }
 
             agent.isStopped = false;
+            if (!charging && dist <= chargeDistance) { charging = true; ChargeStarted?.Invoke(); }
+            else if (charging && dist > chargeDistance * 1.5f) charging = false;
             agent.speed = CurrentSpeed(dist);
             agent.autoBraking = wander01 <= 0f;   // brake on the final run-in so it stops at biting range
             agent.stoppingDistance = dist <= attackRange ? 1f : attackRange * 0.8f;
@@ -218,6 +233,7 @@ namespace BowGame
         {
             isAttacking = true;
             SetAnimTrigger(attackTrigger);
+            AttackStarted?.Invoke();
 
             yield return new WaitForSeconds(biteDelay);
 
@@ -238,6 +254,7 @@ namespace BowGame
             if (isDead) return;
 
             pausedUntil = 0f;   // getting shot snaps it out of a pause
+            Hit?.Invoke(zone, hitPoint);
             switch (zone)
             {
                 case HitZone.Head:
@@ -273,6 +290,7 @@ namespace BowGame
             }
 
             GameEvents.RaiseDinoDied(gameObject);
+            Died?.Invoke();
             Destroy(gameObject, corpseTime);
         }
 
@@ -286,6 +304,7 @@ namespace BowGame
                 yield return null;
             }
             transform.rotation = to;
+            Collapsed?.Invoke();
         }
 
         // ---------- helpers ----------
