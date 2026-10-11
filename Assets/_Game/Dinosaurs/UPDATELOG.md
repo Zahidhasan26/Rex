@@ -6,6 +6,37 @@ Newest entries at the top.
 
 ---
 
+## 2026-10-11 (final boss with face scan)
+
+New folder **`Boss/`** for the last act's boss: a tall man in a suit (2.5 m) whose face is the player's own photo.
+
+### Model (`Boss/Models/Boss.fbx`, textures in `Boss/Textures/`)
+- Body from "GEORGE CLOON(EY)" by vmmaniac (CC-BY-4.0, credit in `Boss/CREDITS.txt`). **The original head is removed completely** (face, eyes, brows, teeth, tongue). The boss does not look like any real person.
+- New generic head built for the scan: skin, a front **face plate** with a straight-on UV projection (materials `Boss_Skin`, `Boss_Face`), and a clean-cut slicked-back **hair cap** (`Boss_Hair`). The head is skinned to the neck and head bones.
+- Bones renamed to plain Mixamo names (`Hips`, `Spine1`, `Head`, `RightHand`, ...).
+- **Animation clips (12):** Idle (original), plus new ones: Walk, Run, StrafeLeft, StrafeRight, Throw (orb released at 0.62 s), ChargeWindup (chest-out roar), Swing (two-handed overhead smash, lands at 0.40 s), Hit, Death_Back, Death_Forward, Death_Kneel. The deaths end lying on the ground (checked against the mesh).
+
+### Face scan (memory only)
+- **`Scripts/FaceScanStation.cs`**: pre-game booth on the PC screen. Consent first: nothing is captured until the person presses Y. The screen then shows a live mirrored camera view with an oval guide and an eye line; Space starts a 3 s countdown and takes the photo; Enter keeps it, R retakes, N skips (the boss wears a mask instead), Backspace forgets the scan at any time. Public methods (`Agree`, `TakePhoto`, `Keep`, `Retake`, `Skip`, `Forget`) are there for VR or UI buttons, and an `onFinished` event lets the flow continue.
+- **`Scripts/FaceScanStore.cs`**: holds the photo for this play session only. It is never saved to disk or uploaded, and is destroyed when it is replaced, forgotten, or the game quits.
+- **`Scripts/BossFace.cs`**: builds the face texture at runtime. The photo sits in a soft-edged oval that blends into a skin colour sampled from the photo's cheeks and forehead; `Boss_Skin` is tinted the same colour so the edge of the face plate doesn't show. It updates live if the scan changes. With no scan, the boss gets a generated porcelain mask (dark eye holes and a thin mouth).
+
+### Boss behaviour (`Scripts/BossEnemy.cs`, extends `Dinosaur`)
+- Uses the shared approach, sidestepping, hit zones and death variants.
+- **Throw:** at range it winds up and hurls a glowing orb from its right hand (12 damage). The orb is `Prefabs/BossOrb.prefab`, which reuses `SpitProjectile`; its impact is `BossOrbBurst.prefab`.
+- **Charge and smash:** from 5 m or further (40% chance), it plants its feet and roars, then sprints at 7.5 m/s. It steers only 50°/s, so the player can sidestep. It finishes with the overhead smash (25 damage if within 2.6 m). Close up it smashes without the run.
+- **Health:** 24 body hits or 6 headshots. Below 50% health it **enrages**: shorter cooldowns and more charges.
+- The cooldown starts when an attack ends. Flinches don't queue up during attacks. Backing away plays the walk in reverse.
+- Events: `BossEnemy.Defeated` (static), and `ThrowStarted`, `ChargeAnnounced`, `SmashStarted`, `Enraged` for sound and UI.
+
+### Assets and tools
+- **`Editor/BossBuilder.cs`**, menu **BowGame > Boss > Build Boss Assets**: sets the FBX import (generic rig, clip names, loops, material remap), makes the materials, the Animator Controller (`Animation/Boss.controller`), both orb prefabs and `Prefabs/Boss.prefab` (NavMeshAgent, trigger hitboxes on the Dinosaur layer for the head, body and both legs, and an orb held in the hand during the wind-up). Safe to re-run.
+- **`Boss/BossTest.unity`**: a copy of DinoTest with the boss 18 m in front of the player and a FaceScanStation (tick `showOnStart` to try the scan).
+
+### Tested
+- In Play mode: walk, charge roar, run, smash, throw wind-up and release, and death all play and read correctly from the side. Throws and smashes hit the dummy player.
+- The face texture was checked with a drawn cartoon face (no real photo) and with the default mask. No errors.
+
 ## 2026-10-11 (per-dinosaur variation)
 
 - **`Scripts/DinoVariation.cs`** (on both dinosaur prefabs): picks small random differences once, when a dinosaur spawns.

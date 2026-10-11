@@ -6,6 +6,11 @@ New things go in `UPDATELOG.md`. Newest entries at the top.
 
 ---
 
+## 2026-10-11 (final boss)
+
+### Changed
+- No existing dinosaur files changed. The boss reuses `Dinosaur.cs` and `SpitProjectile.cs` as they are, and the orb's particles reuse the `Spit_Mist` and `Spit_Droplet` materials.
+
 ## 2026-10-11 (death variants and sidestepping)
 
 ### Changed

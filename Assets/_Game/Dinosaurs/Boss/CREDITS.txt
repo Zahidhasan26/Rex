@@ -1,0 +1,10 @@
+Boss body model
+---------------
+Based on "GEORGE CLOON(EY)" by vmmaniac
+https://sketchfab.com/3d-models/george-clooney-7ad7b7da50c74a179fa92b8441515663
+Licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+
+Changes: the original head, face, eyes, teeth and brows were removed entirely and replaced
+with a generic head (skin, face plate, hair cap) built for the face-scan feature. Bones were
+renamed to plain Mixamo names. All animations except Idle were made for this project.
+The boss does not represent any real person.
