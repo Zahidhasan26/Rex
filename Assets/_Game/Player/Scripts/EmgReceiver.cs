@@ -21,11 +21,37 @@ namespace BowGame
         volatile bool running;
         volatile float latest;
         long lastPacketTicks;
+
+        // ---- diagnostics (read by the EMG test panel)
+        public static int PacketCount;          // every packet that arrived, readable or not
+        public static int BadPackets;           // packets whose text wasn't a number
+        public static string LastText = "";     // the last packet as text
+        public static string LastSender = "";   // ip:port it came from
+        public static bool PortOpen;            // false if the UDP port couldn't be opened
+        static long lastAnyPacketTicks;         // any packet at all, readable or not
+        /// Seconds since anything arrived from the ESP32 (infinity if never).
+        public static float SecondsSinceEsp32 =>
+            Interlocked.Read(ref lastAnyPacketTicks) == 0 ? float.PositiveInfinity
+            : (float)((System.DateTime.UtcNow.Ticks - Interlocked.Read(ref lastAnyPacketTicks)) / 1e7);
         InputAction fallback;
         float smoothed;
 
         // ---- calibration: the armband sends its raw level (0..1); relax and flex set the range the game uses
         public static EmgReceiver Instance;
+
+        /// The ESP32's address, learned from its packets (null until it has sent something).
+        public static IPAddress Esp32Address;
+
+        /// Sends from the SAME port the armband data arrives on (5005). The ESP32 answers to the port
+        /// it heard from, so its data comes back as a reply on this conversation and Windows Firewall
+        /// lets it in without an admin rule.
+        public bool SendFromListenPort(byte[] data, IPEndPoint to)
+        {
+            var u = udp;
+            if (u == null) return false;
+            try { u.Send(data, data.Length, to); return true; }
+            catch (System.Exception e) { Debug.LogWarning("[EmgReceiver] send failed: " + e.Message); return false; }
+        }
         [Tooltip("Raw level when the arm is relaxed (set by calibration).")]
         public float relaxLevel = 0.05f;
         [Tooltip("Raw level when flexing hard (set by calibration).")]
@@ -56,12 +82,15 @@ namespace BowGame
             try
             {
                 udp = new UdpClient(port);
+                udp.EnableBroadcast = true;
+                PortOpen = true;
                 running = true;
                 thread = new Thread(Listen) { IsBackground = true };
                 thread.Start();
             }
             catch (System.Exception e)
             {
+                PortOpen = false;
                 Debug.LogWarning("[EmgReceiver] Could not open UDP port " + port + ": " + e.Message);
             }
         }
@@ -85,11 +114,17 @@ namespace BowGame
                 {
                     var data = udp.Receive(ref ep);
                     var text = Encoding.ASCII.GetString(data).Trim();
+                    PacketCount++;
+                    Interlocked.Exchange(ref lastAnyPacketTicks, System.DateTime.UtcNow.Ticks);
+                    LastText = text;
+                    LastSender = ep.ToString();
+                    Esp32Address = ep.Address;
                     if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
                     {
                         latest = Mathf.Clamp01(v);
                         Interlocked.Exchange(ref lastPacketTicks, System.DateTime.UtcNow.Ticks);
                     }
+                    else BadPackets++;
                 }
                 catch { /* socket closed or bad packet */ }
             }
@@ -99,6 +134,9 @@ namespace BowGame
         {
             long last = Interlocked.Read(ref lastPacketTicks);
             bool connected = last != 0 && (System.DateTime.UtcNow.Ticks - last) < (long)(hardwareTimeout * 10000000L);
+            if (connected != EmgInput.HardwareConnected)
+                Debug.Log(connected ? "[EmgReceiver] armband connected (" + LastSender + ")"
+                                    : "[EmgReceiver] armband lost, no data for " + hardwareTimeout + " s, using the trigger");
             EmgInput.HardwareConnected = connected;
 
             float raw = latest;

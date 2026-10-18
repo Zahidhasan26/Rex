@@ -18,8 +18,8 @@
 #include <WiFiUdp.h>
 
 // ---------------------------------------------------------------- settings
-const char* WIFI_NAME     = "HALAR_HOTSPOT_NAME";   // <- Halar's hotspot name (2.4 GHz)
-const char* WIFI_PASSWORD = "HOTSPOT_PASSWORD";     // <- its password
+const char* WIFI_NAME     = "zh";   // <- Halar's hotspot name (2.4 GHz)
+const char* WIFI_PASSWORD = "halar2008";     // <- its password
 
 const int  PIN_EMG   = 32;
 const int  PIN_LEFT  = 25;
@@ -41,7 +41,8 @@ const int  EMG_SEND_EVERY_MS = 20;   // 50 Hz
 
 WiFiUDP udpVest;   // listens for hits
 WiFiUDP udpEmg;    // sends the muscle level
-IPAddress gameIp;  // learned from the first hit packet; until then the EMG value is broadcast
+IPAddress gameIp;  // learned from the game's packets (it pings once a second); until then the EMG value is broadcast
+uint16_t gamePort = PORT_EMG;
 bool haveGameIp = false;
 
 const int motorPins[3] = { PIN_LEFT, PIN_RIGHT, PIN_BACK };
@@ -105,7 +106,15 @@ void handleHits()
     char buf[32];
     int n = udpVest.read(buf, sizeof(buf) - 1);
     buf[n > 0 ? n : 0] = 0;
-    if (!haveGameIp) { gameIp = udpVest.remoteIP(); haveGameIp = true; Serial.print("Game found at "); Serial.println(gameIp); }
+    // Always answer to the address AND port the game talks from: the EMG data then counts as a reply,
+    // which Windows Firewall lets through without an extra rule.
+    IPAddress from = udpVest.remoteIP();
+    uint16_t fromPort = udpVest.remotePort();
+    if (!haveGameIp || from != gameIp || fromPort != gamePort)
+    {
+      gameIp = from; gamePort = fromPort; haveGameIp = true;
+      Serial.printf("Game found at %s port %u\n", gameIp.toString().c_str(), gamePort);
+    }
 
     char side = buf[0];
     int strength = 200;
@@ -116,7 +125,7 @@ void handleHits()
     else if (side == 'R') buzz(1, strength);
     else if (side == 'F') { buzz(0, strength); buzz(1, strength); buzz(2, strength); }   // bite from the front: whole vest
     else if (side == 'B') buzz(2, strength);
-    Serial.printf("hit %s\n", buf);
+    if (side != 'P') Serial.printf("hit %s\n", buf);   // 'P' is the game's once-a-second "I'm here" ping
 
     size = udpVest.parsePacket();
   }
@@ -143,14 +152,37 @@ void sendEmg()
 
   char msg[12];
   snprintf(msg, sizeof(msg), "%.3f", emgSmooth);
-  udpEmg.beginPacket(haveGameIp ? gameIp : IPAddress(255, 255, 255, 255), PORT_EMG);
-  udpEmg.print(msg);
-  udpEmg.endPacket();
+  // sent from the vest socket (port 5006) so it travels back on the same conversation the game started
+  if (haveGameIp) udpVest.beginPacket(gameIp, gamePort);
+  else            udpVest.beginPacket(IPAddress(255, 255, 255, 255), PORT_EMG);
+  udpVest.print(msg);
+  udpVest.endPacket();
+}
+
+// Type "s" + Enter in Serial Monitor (115200) for a status report.
+void printStatus()
+{
+  Serial.println("----- status -----");
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Serial.printf("Wi-Fi: CONNECTED to %s, signal %d dBm\n", WIFI_NAME, WiFi.RSSI());
+    Serial.print("ESP32 IP: "); Serial.println(WiFi.localIP());
+  }
+  else Serial.printf("Wi-Fi: NOT connected (trying %s)\n", WIFI_NAME);
+  if (haveGameIp) Serial.printf("Game (laptop) found at: %s port %u\n", gameIp.toString().c_str(), gamePort);
+  else Serial.println("Game: not heard from yet (start Play in Unity)");
+  Serial.printf("EMG pin %d level: %.3f (raw %d of 4095)\n", PIN_EMG, emgSmooth, analogRead(PIN_EMG));
+  Serial.println("------------------");
 }
 
 void loop()
 {
   updateMotors();
+  while (Serial.available())
+  {
+    char c = Serial.read();
+    if (c == 's' || c == 'S') printStatus();
+  }
 
   if (WiFi.status() != WL_CONNECTED)
   {

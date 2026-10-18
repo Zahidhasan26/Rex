@@ -556,6 +556,8 @@ MonoBehaviour:
   flashRenderer: {fileID: 3866365723424883836}
   flashQuad: {fileID: 6954454062429014258}
   barWidth: 0.12
+  messageDistance: 2
+  pinnedSize: 0.65
 --- !u!1 &3269349692223060311
 GameObject:
   m_ObjectHideFlags: 0
@@ -1841,6 +1843,8 @@ MonoBehaviour:
   port: 5005
   hardwareTimeout: 1
   smoothing: 18
+  relaxLevel: 0.05
+  flexLevel: 0.6
 --- !u!114 &4698899109725533807
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1856,6 +1860,7 @@ MonoBehaviour:
   port: 5006
   vestIp: 
   logHits: 1
+  pingInterval: 1
 --- !u!114 &7402167447306084488
 MonoBehaviour:
   m_ObjectHideFlags: 0

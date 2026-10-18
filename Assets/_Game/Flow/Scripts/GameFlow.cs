@@ -9,11 +9,11 @@ using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 namespace BowGame
 {
     // Act 1 from start to finish:
-    //   spawn in the ring -> tutorial (controls, calibration if the armband is connected, 3 practice arrows,
-    //   walk forward then backward with the left joystick) -> face the front -> countdown -> fight (alpha first)
+    //   spawn in the ring -> tutorial (controls, calibration if the armband is connected, 3 practice arrows)
+    //   -> face the front -> countdown -> fight (alpha first)
     //   -> survived / died -> restart.
     // Sets GameRefs.State / StateTimeLeft and raises GameEvents.StateChanged; the spawner, dinosaurs and HUD react to that.
-    // Keyboard for testing without the headset: T = skip the tutorial, R = restart after the round.
+    // Keyboard for testing without the headset: T = skip the tutorial, R = restart after the round, C = play the cutscene now.
     public class GameFlow : MonoBehaviour
     {
         public GameConfig config;
@@ -73,6 +73,7 @@ namespace BowGame
             if (config == null) { Debug.LogError("GameFlow: no GameConfig assigned."); yield break; }
             origin = FindAnyObjectByType<XROrigin>();
             if (FindAnyObjectByType<JoystickMove>() == null) gameObject.AddComponent<JoystickMove>();   // left joystick always walks
+            if (FindAnyObjectByType<SmoothRigHeight>() == null) gameObject.AddComponent<SmoothRigHeight>();   // no jolts on bumpy ground
             calm = MakeMusic("Music_Calm", config.calmMusic);
             battle = MakeMusic("Music_Battle", config.battleMusic);
             ringCenter = Ground(config.ringSpot.x, config.ringSpot.y);
@@ -102,7 +103,7 @@ namespace BowGame
 
             if (tutorial)
             {
-                const string controls = "Hold the bow in your LEFT hand.\nRIGHT trigger: grab the string,\npull your hand back, let go to shoot.";
+                const string controls = "Hold the bow in your LEFT hand.\nRIGHT trigger: grab the string,\npull your hand back, let go to shoot.\nLEFT JOYSTICK: walk (dodge!)";
                 Say(controls);
                 yield return WaitOrSkip(config.controlsSeconds);
                 if (PlayerHud.Instance != null) PlayerHud.Instance.Pin(controls);   // stays above the next instructions, smaller
@@ -136,20 +137,9 @@ namespace BowGame
                 }
 
                 clampToArena = true;
-                TeleportToRing();   // same placement the skip path uses, so walking starts from a clean state
+                TeleportToRing();   // back to the centre of the ring, facing the front
                 var mover = FindAnyObjectByType<JoystickMove>();
-                if (mover != null) mover.EnableProvider();
-                if (!skipRequested)
-                    yield return WalkPractice("Push the LEFT JOYSTICK forward to walk", +1f, config.walkForwardSeconds);
-                if (!skipRequested)
-                    yield return WalkPractice("Now pull it back to walk backward", -1f, config.walkBackSeconds);
-                if (!skipRequested)
-                {
-                    Say("Good! Head back into the ring");
-                    while (!InRing() && !skipRequested) { UpdateGuide(true); yield return null; }
-                    UpdateGuide(false);
-                }
-                if (skipRequested) TeleportToRing();
+                if (mover != null) mover.EnableProvider();   // walking still works in the fight (dodging spit and charges)
             }
             else
             {
@@ -238,9 +228,12 @@ namespace BowGame
 
         // Plays config.cutscene on a big screen in front of the player. Everything else goes dark,
         // walking is paused, and A (or R / Space) skips it.
+        bool cutscenePlaying;
+
         IEnumerator PlayCutscene()
         {
-            if (origin == null) yield break;
+            if (origin == null || cutscenePlaying) yield break;
+            cutscenePlaying = true;
             var cam = origin.Camera;
             var clip = config.cutscene;
 
@@ -260,7 +253,8 @@ namespace BowGame
             screen.transform.rotation = Quaternion.LookRotation(f, Vector3.up);
             screen.transform.localScale = new Vector3(config.cutsceneWidth, config.cutsceneWidth / aspect, 1f);
 
-            var rt = new RenderTexture((int)clip.width > 0 ? (int)clip.width : 1920, (int)clip.height > 0 ? (int)clip.height : 1080, 0);
+            var rt = new RenderTexture(clip.width > 0 ? (int)clip.width : 1280, clip.height > 0 ? (int)clip.height : 720, 0);
+            rt.Create();
             var mat = ringMaterial != null ? new Material(ringMaterial) : new Material(Shader.Find("Universal Render Pipeline/Unlit"));
             mat.color = Color.white;
             mat.mainTexture = rt;
@@ -276,6 +270,9 @@ namespace BowGame
             vp.clip = clip;
             vp.renderMode = VideoRenderMode.RenderTexture;
             vp.targetTexture = rt;
+            vp.timeUpdateMode = VideoTimeUpdateMode.UnscaledGameTime;
+            vp.skipOnDrop = true;
+            vp.errorReceived += (p, msg) => Debug.LogWarning("[Cutscene] video error: " + msg);
             vp.audioOutputMode = VideoAudioOutputMode.AudioSource;
             vp.EnableAudioTrack(0, true);
             vp.SetTargetAudioSource(0, voice);
@@ -304,9 +301,15 @@ namespace BowGame
             vp.Play();
             float canSkipAt = Time.time + 1f;
             float maxEnd = Time.time + (float)clip.length + 5f;   // safety net if the end event never comes
+            float nextLog = Time.time + 1f;
             while (!finished && Time.time < maxEnd)
             {
                 if (Time.time > canSkipAt && restartAction.WasPressedThisFrame()) break;
+                if (Time.time >= nextLog)   // tells us in the Console whether frames are advancing
+                {
+                    nextLog = Time.time + 1f;
+                    Debug.Log("[Cutscene] frame " + vp.frame + " / " + vp.frameCount + ", time " + vp.time.ToString("0.0") + "s, playing " + vp.isPlaying);
+                }
                 yield return null;
             }
 
@@ -320,6 +323,7 @@ namespace BowGame
             Destroy(screen);
             Destroy(mat);
             rt.Release(); Destroy(rt);
+            cutscenePlaying = false;
             yield return new WaitForSeconds(0.5f);   // so the skip press doesn't also restart the game
         }
 
@@ -359,6 +363,9 @@ namespace BowGame
         void Update()
         {
             if (skipAction != null && skipAction.WasPressedThisFrame()) skipRequested = true;
+            // testing: C plays the cutscene right away
+            if (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame && !cutscenePlaying && config != null && config.cutscene != null)
+                StartCoroutine(PlayCutscene());
 
             // Keep the message on the HUD (the HUD's own state messages would otherwise replace it).
             if (PlayerHud.Instance != null && Time.time >= messageRefreshAt && !string.IsNullOrEmpty(message))
