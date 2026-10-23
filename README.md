@@ -7,7 +7,11 @@ Built in one weekend at **Knight Hacks IX** (UCF, October 2026) for the Game Dev
 ## Demo
 
 <!-- Replace VIDEO_ID (twice) with the YouTube video id, e.g. https://youtu.be/dQw4w9WgXcQ -> dQw4w9WgXcQ -->
-[![Rex gameplay demo](https://youtu.be/qgDpLJCkhW0)
+## Demo
+
+[![Rex gameplay demo](https://img.youtube.com/vi/qgDpLJCkhW0/hqdefault.jpg)](https://youtu.be/qgDpLJCkhW0)
+
+▶ [Watch the gameplay demo on YouTube](https://youtu.be/qgDpLJCkhW0)
 
 Devpost: [link]
 
